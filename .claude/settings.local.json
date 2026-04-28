@@ -13,7 +13,8 @@
       "Bash(cp -r /tmp/the-doula-hive/app .)",
       "Bash(cp /tmp/the-doula-hive/.eslintrc.json .)",
       "Bash(cp /tmp/the-doula-hive/package-lock.json .)",
-      "Bash(npx shadcn@latest init --defaults)"
+      "Bash(npx shadcn@latest init --defaults)",
+      "Bash(supabase --version)"
     ]
   }
 }
