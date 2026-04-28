@@ -14,7 +14,9 @@
       "Bash(cp /tmp/the-doula-hive/.eslintrc.json .)",
       "Bash(cp /tmp/the-doula-hive/package-lock.json .)",
       "Bash(npx shadcn@latest init --defaults)",
-      "Bash(supabase --version)"
+      "Bash(supabase --version)",
+      "Bash(xargs grep *)",
+      "Bash(npm run *)"
     ]
   }
 }

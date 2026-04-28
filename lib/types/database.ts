@@ -153,27 +153,36 @@ export interface Database {
         Row: Profile
         Insert: ProfileInsert
         Update: ProfileUpdate
+        Relationships: []
       }
       doula_profiles: {
         Row: DoulaProfile
         Insert: DoulaProfileInsert
         Update: DoulaProfileUpdate
+        Relationships: []
       }
       family_profiles: {
         Row: FamilyProfile
         Insert: FamilyProfileInsert
         Update: FamilyProfileUpdate
+        Relationships: []
       }
       connections: {
         Row: Connection
         Insert: ConnectionInsert
         Update: ConnectionUpdate
+        Relationships: []
       }
       messages: {
         Row: Message
         Insert: MessageInsert
         Update: MessageUpdate
+        Relationships: []
       }
     }
+    Views: Record<string, never>
+    Functions: Record<string, never>
+    Enums: Record<string, never>
+    CompositeTypes: Record<string, never>
   }
 }
