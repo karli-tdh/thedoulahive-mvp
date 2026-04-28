@@ -29,7 +29,8 @@ export interface DoulaProfile {
   intro_video_url: string | null
   intro_video_id: string | null
   years_experience: number | null
-  training_body: string | null
+  clients_supported: string | null
+  training_body: string[] | null
   languages: string[] | null
   specialisms: string[] | null
   support_types: string[] | null

@@ -1,9 +1,298 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import { Button } from '@/components/ui/button'
+import { Step1 } from './_components/step1'
+import { Step2 } from './_components/step2'
+import { Step3 } from './_components/step3'
+import { INITIAL_FORM_DATA } from './types'
+import type { FormData, FormErrors } from './types'
+
+const STEP_TITLES = ['About you', 'Your practice', 'Intro video']
+const TOTAL_STEPS = 3
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function nullToEmpty(v: string | null | undefined): string {
+  return v ?? ''
+}
+function nullToArray(v: string[] | null | undefined): string[] {
+  return v ?? []
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
+
 export default function DoulaOnboardingPage() {
+  const router = useRouter()
+
+  const [step, setStep] = useState(1)
+  const [data, setData] = useState<FormData>(INITIAL_FORM_DATA)
+  const [errors, setErrors] = useState<FormErrors>({})
+  const [saving, setSaving] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [saveError, setSaveError] = useState<string | null>(null)
+
+  // ── Load existing profile data on mount ──────────────────────────────────
+
+  useEffect(() => {
+    async function load() {
+      const supabase = createClient()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) {
+        router.push('/login')
+        return
+      }
+
+      const [{ data: profile }, { data: doula }] = await Promise.all([
+        supabase.from('profiles').select('*').eq('id', user.id).single(),
+        supabase
+          .from('doula_profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle(),
+      ])
+
+      setData({
+        full_name: nullToEmpty(profile?.full_name),
+        location: nullToEmpty(profile?.location),
+        tagline: nullToEmpty(doula?.tagline),
+        bio: nullToEmpty(doula?.bio),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        clients_supported: nullToEmpty((doula as any)?.clients_supported),
+        training_body: nullToArray(doula?.training_body),
+        languages: nullToArray(doula?.languages),
+        specialisms: nullToArray(doula?.specialisms),
+        support_types: nullToArray(doula?.support_types),
+        birth_settings: nullToArray(doula?.birth_settings),
+        travel_radius_km: doula?.travel_radius_km?.toString() ?? '',
+        price_range: nullToEmpty(doula?.price_range),
+        availability: nullToEmpty(doula?.availability),
+        intro_video_url: nullToEmpty(doula?.intro_video_url),
+        intro_video_id: nullToEmpty(doula?.intro_video_id),
+        is_published: doula?.is_published ?? false,
+      })
+
+      setLoading(false)
+    }
+
+    load()
+  }, [router])
+
+  // ── Field change handler ─────────────────────────────────────────────────
+
+  function handleChange<K extends keyof FormData>(
+    field: K,
+    value: FormData[K]
+  ) {
+    setData((prev) => ({ ...prev, [field]: value }))
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }))
+    }
+  }
+
+  // ── Validation ───────────────────────────────────────────────────────────
+
+  function validateStep1(): boolean {
+    const next: FormErrors = {}
+    if (!data.full_name.trim()) next.full_name = 'Your name is required.'
+    if (!data.location.trim()) next.location = 'Your base location is required.'
+    if (!data.tagline.trim()) next.tagline = 'A one-line summary is required.'
+    setErrors(next)
+    return Object.keys(next).length === 0
+  }
+
+  // ── Save handlers (one per step) ─────────────────────────────────────────
+
+  async function saveStep1() {
+    if (!validateStep1()) return
+    setSaving(true)
+    setSaveError(null)
+
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { router.push('/login'); return }
+
+    const [profileResult, doulaResult] = await Promise.all([
+      supabase
+        .from('profiles')
+        .update({ full_name: data.full_name, location: data.location })
+        .eq('id', user.id),
+
+      supabase.from('doula_profiles').upsert(
+        { user_id: user.id, tagline: data.tagline, bio: data.bio || null },
+        { onConflict: 'user_id' }
+      ),
+    ])
+
+    if (profileResult.error || doulaResult.error) {
+      const msg = doulaResult.error?.message ?? profileResult.error?.message ?? 'Save failed'
+      setSaveError(msg)
+      setSaving(false)
+      return
+    }
+
+    setSaving(false)
+    setStep(2)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  async function saveStep2() {
+    setSaving(true)
+    setSaveError(null)
+
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { router.push('/login'); return }
+
+    const { error } = await supabase.from('doula_profiles').upsert(
+      {
+        user_id: user.id,
+        clients_supported: data.clients_supported || null,
+        training_body: data.training_body.length ? data.training_body : null,
+        languages: data.languages.length ? data.languages : null,
+        specialisms: data.specialisms.length ? data.specialisms : null,
+        support_types: data.support_types.length ? data.support_types : null,
+        birth_settings: data.birth_settings.length ? data.birth_settings : null,
+        travel_radius_km: data.travel_radius_km ? parseInt(data.travel_radius_km, 10) : null,
+        price_range: data.price_range || null,
+        availability: data.availability || null,
+      },
+      { onConflict: 'user_id' }
+    )
+
+    if (error) {
+      setSaveError(error.message)
+      setSaving(false)
+      return
+    }
+
+    setSaving(false)
+    setStep(3)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  async function saveStep3() {
+    setSaving(true)
+    setSaveError(null)
+
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { router.push('/login'); return }
+
+    const { error } = await supabase.from('doula_profiles').upsert(
+      {
+        user_id: user.id,
+        intro_video_url: data.intro_video_url || null,
+        intro_video_id: data.intro_video_id || null,
+        is_published: data.is_published,
+      },
+      { onConflict: 'user_id' }
+    )
+
+    if (error) {
+      setSaveError(error.message)
+      setSaving(false)
+      return
+    }
+
+    setSaving(false)
+    router.push('/dashboard?saved=true')
+  }
+
+  // ── Loading state ────────────────────────────────────────────────────────
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-sm text-muted-foreground">Loading your profile…</p>
+      </div>
+    )
+  }
+
+  // ── Render ───────────────────────────────────────────────────────────────
+
+  const progressPct = Math.round((step / TOTAL_STEPS) * 100)
+
   return (
-    <main className="flex min-h-screen items-center justify-center px-4">
-      <h1 className="text-2xl font-semibold text-foreground">
-        Doula onboarding coming soon
-      </h1>
-    </main>
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto max-w-xl px-4 py-10 pb-24">
+
+        {/* Progress indicator */}
+        <div className="mb-10">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-sm font-medium text-foreground">
+              Step {step} of {TOTAL_STEPS} —{' '}
+              <span className="text-muted-foreground">
+                {STEP_TITLES[step - 1]}
+              </span>
+            </p>
+            <p className="text-sm text-muted-foreground">{progressPct}%</p>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-500"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Step content */}
+        {step === 1 && (
+          <Step1 data={data} onChange={handleChange} errors={errors} />
+        )}
+        {step === 2 && (
+          <Step2 data={data} onChange={handleChange} errors={errors} />
+        )}
+        {step === 3 && (
+          <Step3 data={data} onChange={handleChange} errors={errors} />
+        )}
+
+        {/* Save error */}
+        {saveError && (
+          <div className="mt-6 rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            Something went wrong: {saveError}
+          </div>
+        )}
+
+        {/* Navigation */}
+        <div className="mt-10 flex items-center justify-between">
+          {step > 1 ? (
+            <Button
+              variant="outline"
+              onClick={() => {
+                setStep((s) => s - 1)
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+              }}
+              disabled={saving}
+            >
+              Back
+            </Button>
+          ) : (
+            <div />
+          )}
+
+          {step === 1 && (
+            <Button onClick={saveStep1} disabled={saving}>
+              {saving ? 'Saving…' : 'Save & continue'}
+            </Button>
+          )}
+          {step === 2 && (
+            <Button onClick={saveStep2} disabled={saving}>
+              {saving ? 'Saving…' : 'Save & continue'}
+            </Button>
+          )}
+          {step === 3 && (
+            <Button onClick={saveStep3} disabled={saving}>
+              {saving ? 'Saving…' : 'Save profile'}
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
   )
 }

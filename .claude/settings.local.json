@@ -16,7 +16,9 @@
       "Bash(npx shadcn@latest init --defaults)",
       "Bash(supabase --version)",
       "Bash(xargs grep *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(npx shadcn@latest add textarea)",
+      "Bash(npx shadcn@latest add separator)"
     ]
   }
 }
