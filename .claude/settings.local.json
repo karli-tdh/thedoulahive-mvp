@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(node --version)",
+      "PowerShell(npm --version)",
+      "PowerShell(Get-Command node -ErrorAction SilentlyContinue; Get-ChildItem \"C:\\\\Program Files\\\\nodejs\" -ErrorAction SilentlyContinue; Get-ChildItem \"$env:APPDATA\\\\npm\" -ErrorAction SilentlyContinue; $env:PATH -split \";\")",
+      "PowerShell(Get-ChildItem \"C:\\\\Program Files\" -Directory | Where-Object { $_.Name -match \"node|nvm\" }; Get-ChildItem \"C:\\\\Users\\\\karli\\\\AppData\\\\Roaming\" -Directory | Where-Object { $_.Name -match \"node|nvm\" } -ErrorAction SilentlyContinue; Get-ChildItem \"C:\\\\Users\\\\karli\" -Directory | Where-Object { $_.Name -match \"node|nvm\" } -ErrorAction SilentlyContinue)",
+      "Bash(npm --version)",
+      "Bash(npx --version)",
+      "Bash(npx create-next-app@14 . --typescript --tailwind --app --no-src-dir --import-alias \"@/*\" --yes)",
+      "Bash(npx create-next-app@14 . --typescript --tailwind --app --no-src-dir --import-alias \"@/*\" --yes --no-eslint)",
+      "Bash(npx create-next-app@14 /tmp/the-doula-hive --typescript --tailwind --app --no-src-dir --import-alias \"@/*\" --eslint)",
+      "Bash(cp -r /tmp/the-doula-hive/app .)",
+      "Bash(cp /tmp/the-doula-hive/.eslintrc.json .)",
+      "Bash(cp /tmp/the-doula-hive/package-lock.json .)",
+      "Bash(npx shadcn@latest init --defaults)"
+    ]
+  }
+}
