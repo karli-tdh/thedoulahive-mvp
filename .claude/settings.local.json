@@ -18,7 +18,13 @@
       "Bash(xargs grep *)",
       "Bash(npm run *)",
       "Bash(npx shadcn@latest add textarea)",
-      "Bash(npx shadcn@latest add separator)"
+      "Bash(npx shadcn@latest add separator)",
+      "Bash(npm install *)",
+      "Bash(node -e \"const m = require\\('@mux/mux-node'\\); console.log\\(Object.keys\\(m\\)\\)\")",
+      "Bash(node -e \"const {default: Mux} = require\\('@mux/mux-node'\\); const c = new Mux\\({tokenId:'x',tokenSecret:'y'}\\); console.log\\(Object.keys\\(c.video\\)\\)\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }
