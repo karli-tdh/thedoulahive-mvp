@@ -39,7 +39,13 @@ export async function redirectByRole(
   }
 
   if (profile.role === 'doula') {
-    router.push('/onboarding/doula')
+    const { data: doulaProfile } = await supabase
+      .from('doula_profiles')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    router.push(doulaProfile ? '/dashboard' : '/onboarding/doula')
     router.refresh()
     return
   }
