@@ -2,12 +2,17 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 
 /**
- * After a successful sign-in or sign-up, look up the user's role in the
- * profiles table and push them to the right onboarding route.
+ * After a successful sign-in or sign-up, look up the user's role and
+ * onboarding state, then push them to the right destination.
  *
- * - No profile row → /signup (handles manually-created Supabase users)
- * - role = 'doula'  → /onboarding/doula
- * - role = 'family' → /onboarding/family
+ * - No profiles row            → /signup  (manually-created Supabase users)
+ * - role = 'doula'             → /onboarding/doula
+ * - role = 'family', no completed onboarding
+ *   (no family_profiles row, or due_date is null)
+ *                              → /onboarding/family
+ * - role = 'family', onboarding complete
+ *   (family_profiles row exists with due_date set)
+ *                              → /doulas
  */
 export async function redirectByRole(
   supabase: SupabaseClient,
@@ -29,16 +34,28 @@ export async function redirectByRole(
     .maybeSingle()
 
   if (!profile) {
-    // No profiles row — send them back to signup to pick a role
     router.push('/signup')
     return
   }
 
   if (profile.role === 'doula') {
     router.push('/onboarding/doula')
-  } else {
-    // Family onboarding not yet built — send families straight to browse
+    router.refresh()
+    return
+  }
+
+  // Family: check whether onboarding has been completed.
+  // due_date is the first required field — if it's set, onboarding is done.
+  const { data: familyProfile } = await supabase
+    .from('family_profiles')
+    .select('due_date')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (familyProfile?.due_date) {
     router.push('/doulas')
+  } else {
+    router.push('/onboarding/family')
   }
 
   router.refresh()
