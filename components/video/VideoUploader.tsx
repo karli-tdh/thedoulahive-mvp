@@ -341,7 +341,7 @@ export function VideoUploader({ existingPlaybackId, onVideoReady }: VideoUploade
           This is how families will meet you before they message.
         </p>
 
-        <div className="mt-5 flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
+        <div className="mt-5 flex flex-col items-center gap-2 sm:flex-row sm:justify-center sm:gap-3">
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -349,18 +349,17 @@ export function VideoUploader({ existingPlaybackId, onVideoReady }: VideoUploade
           >
             Upload video
           </button>
+          {/* Only shown on mobile — desktop browsers ignore the capture attribute */}
           <button
             type="button"
             onClick={() => {
-              // On mobile, "capture" triggers the camera directly
               if (fileInputRef.current) {
                 fileInputRef.current.setAttribute('capture', 'user')
                 fileInputRef.current.click()
-                // Remove capture after click so upload button works normally
                 setTimeout(() => fileInputRef.current?.removeAttribute('capture'), 500)
               }
             }}
-            className="w-full rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors sm:w-auto"
+            className="sm:hidden w-full rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
           >
             Record video
           </button>
