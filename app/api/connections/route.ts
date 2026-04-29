@@ -7,15 +7,14 @@ import { createClient } from '@/lib/supabase/server'
  *
  * Body: { doulaProfileId: string, reactionNote: string }
  *
- * Steps:
- *  1. Verify the caller is authenticated and has role = 'family'
- *  2. Get or create their family_profiles row (onboarding may not be done yet)
- *  3. Insert into connections — duplicate is treated as success
+ * Delegates to the `create_connection` Postgres SECURITY DEFINER function
+ * (migration 005) which handles get-or-create family_profiles and the
+ * connections insert atomically, bypassing RLS fragility server-side.
  */
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
 
-  // ── 1. Auth ───────────────────────────────────────────────────────────────
+  // ── 1. Confirm auth (getUser validates JWT via Supabase Auth API) ──────────
 
   const {
     data: { user },
@@ -26,27 +25,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
 
-  // ── 2. Role check ─────────────────────────────────────────────────────────
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (profile?.role !== 'family') {
-    return NextResponse.json(
-      { error: 'Only family accounts can send connection requests.' },
-      { status: 403 }
-    )
-  }
-
-  // ── 3. Parse body ─────────────────────────────────────────────────────────
+  // ── 2. Parse body ─────────────────────────────────────────────────────────
 
   let doulaProfileId: string
   let reactionNote: string
   try {
-    const body = await request.json()
+    const body     = await request.json()
     doulaProfileId = body.doulaProfileId
     reactionNote   = body.reactionNote
   } catch {
@@ -60,57 +44,27 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  // ── 4. Get or create family_profiles row ──────────────────────────────────
+  // ── 3. Call the SECURITY DEFINER RPC function ─────────────────────────────
+  // This runs server-side in Postgres with the function owner's privileges,
+  // bypassing RLS while still using auth.uid() from the JWT for identity.
 
-  const { data: existingProfile, error: fpSelectErr } = await supabase
-    .from('family_profiles')
-    .select('id')
-    .eq('user_id', user.id)
-    .maybeSingle()
+  const { data: result, error: rpcErr } = await supabase.rpc('create_connection', {
+    p_doula_profile_id: doulaProfileId,
+    p_reaction_note:    reactionNote.trim(),
+  })
 
-  if (fpSelectErr) {
-    console.error('[POST /api/connections] family_profiles select:', fpSelectErr.message)
-    return NextResponse.json({ error: 'Failed to load your profile.' }, { status: 500 })
+  if (rpcErr) {
+    console.error('[POST /api/connections] RPC error:', rpcErr.message)
+    return NextResponse.json({ error: rpcErr.message }, { status: 500 })
   }
 
-  let familyProfile = existingProfile
-
-  if (!familyProfile) {
-    const { data: created, error: fpInsertErr } = await supabase
-      .from('family_profiles')
-      .insert({ user_id: user.id })
-      .select('id')
-      .single()
-
-    if (fpInsertErr || !created) {
-      console.error('[POST /api/connections] family_profiles insert:', fpInsertErr?.message)
-      return NextResponse.json(
-        { error: 'Failed to set up your profile. Please try again.' },
-        { status: 500 }
-      )
-    }
-
-    familyProfile = created
-  }
-
-  // ── 5. Insert connection ───────────────────────────────────────────────────
-
-  const { error: connErr } = await supabase
-    .from('connections')
-    .insert({
-      family_id:     familyProfile.id,
-      doula_id:      doulaProfileId,
-      reaction_note: reactionNote.trim(),
-      status:        'pending',
-    })
-
-  if (connErr) {
-    // Unique constraint — already sent, treat as success
-    if (connErr.code === '23505') {
-      return NextResponse.json({ success: true, alreadyExists: true })
-    }
-    console.error('[POST /api/connections] connection insert:', connErr.message, connErr.code)
-    return NextResponse.json({ error: connErr.message }, { status: 500 })
+  // The function returns { success: true } or { error: '...' }
+  if (result?.error) {
+    console.error('[POST /api/connections] function error:', result.error)
+    const status = result.error === 'Not authenticated'   ? 401
+                 : result.error.includes('Only family')   ? 403
+                 : 500
+    return NextResponse.json({ error: result.error }, { status })
   }
 
   return NextResponse.json({ success: true })
