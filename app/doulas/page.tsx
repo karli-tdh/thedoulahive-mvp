@@ -8,7 +8,11 @@ export const metadata = {
     'Browse birth and postpartum doulas. Watch their intro videos and connect directly.',
 }
 
-export default async function DoulasPage() {
+export default async function DoulasPage({
+  searchParams,
+}: {
+  searchParams: { welcome?: string }
+}) {
   const supabase = await createClient()
 
   const { data: doulas, error } = await supabase
@@ -34,7 +38,7 @@ export default async function DoulasPage() {
 
   return (
     <main className="min-h-screen">
-      <DolaGrid doulas={typed} />
+      <DolaGrid doulas={typed} welcome={searchParams.welcome === 'true'} />
     </main>
   )
 }

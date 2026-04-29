@@ -59,10 +59,11 @@ function hasFilters(f: Filters) {
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-export function DolaGrid({ doulas }: { doulas: DoulaListItem[] }) {
+export function DolaGrid({ doulas, welcome = false }: { doulas: DoulaListItem[]; welcome?: boolean }) {
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [specialismOpen, setSpecialismOpen] = useState(false)
+  const [showWelcome, setShowWelcome] = useState(welcome)
 
   // ── Filtering ─────────────────────────────────────────────────────────────
 
@@ -133,6 +134,25 @@ export function DolaGrid({ doulas }: { doulas: DoulaListItem[] }) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+
+      {/* Welcome banner — shown after family onboarding completes */}
+      {showWelcome && (
+        <div className="mb-6 flex items-start justify-between gap-4 rounded-2xl bg-muted/60 px-5 py-4">
+          <p className="text-sm text-foreground">
+            <span className="font-medium">You&apos;re all set.</span> Start browsing doulas below.
+          </p>
+          <button
+            type="button"
+            onClick={() => setShowWelcome(false)}
+            aria-label="Dismiss"
+            className="shrink-0 text-muted-foreground hover:text-foreground"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* Page heading */}
       <div className="mb-8">
