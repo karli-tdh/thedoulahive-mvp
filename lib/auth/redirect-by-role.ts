@@ -37,7 +37,8 @@ export async function redirectByRole(
   if (profile.role === 'doula') {
     router.push('/onboarding/doula')
   } else {
-    router.push('/onboarding/family')
+    // Family onboarding not yet built — send families straight to browse
+    router.push('/doulas')
   }
 
   router.refresh()

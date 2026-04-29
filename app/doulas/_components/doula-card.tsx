@@ -46,38 +46,41 @@ export function DoulaCard({ doula }: { doula: DoulaListItem }) {
 
       <article className="flex flex-col rounded-2xl border border-border bg-card hover:border-foreground/25 transition-colors overflow-hidden">
 
-        {/* Thumbnail / play button */}
-        {doula.intro_video_id ? (
-          <button
-            type="button"
-            onClick={() => setShowVideo(true)}
-            className="group relative aspect-video w-full overflow-hidden bg-muted"
-            aria-label={`Watch ${name}'s intro video`}
-          >
-            <Image
-              src={`https://image.mux.com/${doula.intro_video_id}/thumbnail.jpg`}
-              alt=""
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-            />
-            {/* Play overlay */}
-            <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/35 transition-colors">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 shadow-lg">
-                <svg
-                  className="ml-1 h-6 w-6 text-foreground"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M8 5v14l11-7z" />
-                </svg>
+        {/* Thumbnail — clicking navigates to profile page */}
+        <Link
+          href={`/doulas/${doula.id}`}
+          className="group relative block aspect-video w-full overflow-hidden bg-muted"
+          tabIndex={-1}
+          aria-hidden
+        >
+          {doula.intro_video_id ? (
+            <>
+              <Image
+                src={`https://image.mux.com/${doula.intro_video_id}/thumbnail.jpg`}
+                alt=""
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+              />
+              {/* Decorative play badge — indicates video exists, but click goes to profile */}
+              <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/25 transition-colors">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-lg ring-1 ring-black/10">
+                  {/* Play triangle — optically nudged right to look centred */}
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="h-6 w-6 translate-x-0.5 text-gray-800"
+                    aria-hidden
+                  >
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
               </div>
-            </div>
-          </button>
-        ) : (
-          /* Placeholder block when no video yet */
-          <div className="aspect-video w-full bg-muted/60" />
-        )}
+            </>
+          ) : (
+            <div className="h-full w-full bg-muted/60" />
+          )}
+        </Link>
 
         {/* Content */}
         <div className="flex flex-1 flex-col gap-3 p-5">
