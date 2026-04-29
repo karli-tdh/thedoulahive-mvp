@@ -4,33 +4,33 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-type Phase = 'idle' | 'form' | 'submitting' | 'done' | 'error'
+type Phase = 'idle' | 'form' | 'submitting' | 'done'
 
 interface ConnectButtonProps {
-  doulaProfileId: string   // doula_profiles.id — used as connections.doula_id
+  doulaProfileId: string   // doula_profiles.id
   doulaName: string
   returnPath: string       // e.g. /doulas/[id] — for post-signup redirect
 }
 
 export function ConnectButton({ doulaProfileId, doulaName, returnPath }: ConnectButtonProps) {
-  const [phase, setPhase]   = useState<Phase>('idle')
-  const [note, setNote]     = useState('')
-  const [error, setError]   = useState<string | null>(null)
+  const [phase, setPhase] = useState<Phase>('idle')
+  const [note, setNote]   = useState('')
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
-  // ── Step 1: button click ──────────────────────────────────────────────────
+  // ── Step 1: open the form ─────────────────────────────────────────────────
+  // Check auth client-side so we can redirect immediately if not logged in.
 
   async function handleOpen() {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      // Redirect to signup; after auth they'll land back here
       router.push(`/signup?returnTo=${encodeURIComponent(returnPath)}`)
       return
     }
 
-    // Doulas can't connect with other doulas
+    // Fetch role — doulas should not be able to send connection requests
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
@@ -45,61 +45,37 @@ export function ConnectButton({ doulaProfileId, doulaName, returnPath }: Connect
     setPhase('form')
   }
 
-  // ── Step 2: submit ────────────────────────────────────────────────────────
+  // ── Step 2: submit via API route ─────────────────────────────────────────
+  // The actual insert happens server-side where auth context is unambiguous
+  // and all errors are logged to Vercel / dev console.
 
   async function handleSubmit() {
     if (!note.trim()) return
     setPhase('submitting')
     setError(null)
 
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/signup'); return }
+    try {
+      const res = await fetch('/api/connections', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ doulaProfileId, reactionNote: note.trim() }),
+      })
 
-    // Get or create the family_profiles row (family onboarding may not be done yet)
-    let { data: familyProfile } = await supabase
-      .from('family_profiles')
-      .select('id')
-      .eq('user_id', user.id)
-      .maybeSingle()
+      const json = await res.json()
 
-    if (!familyProfile) {
-      const { data: created, error: createErr } = await supabase
-        .from('family_profiles')
-        .insert({ user_id: user.id })
-        .select('id')
-        .single()
-
-      if (createErr || !created) {
-        setError('Something went wrong. Please try again.')
+      if (!res.ok) {
+        console.error('[ConnectButton] API error:', json)
+        setError(json.error ?? 'Something went wrong. Please try again.')
         setPhase('form')
         return
       }
-      familyProfile = created
-    }
 
-    // Insert connection
-    const { error: insertErr } = await supabase
-      .from('connections')
-      .insert({
-        family_id:     familyProfile.id,
-        doula_id:      doulaProfileId,
-        reaction_note: note.trim(),
-        status:        'pending',
-      })
-
-    if (insertErr) {
-      // Unique constraint = already sent — treat as success
-      if (insertErr.code === '23505') {
-        setPhase('done')
-        return
-      }
-      setError('Couldn\'t send your request. Please try again.')
+      setPhase('done')
+    } catch (err) {
+      console.error('[ConnectButton] Network error:', err)
+      setError('Network error — please check your connection and try again.')
       setPhase('form')
-      return
     }
-
-    setPhase('done')
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -159,12 +135,10 @@ export function ConnectButton({ doulaProfileId, doulaName, returnPath }: Connect
     )
   }
 
-  // Idle (default)
+  // Idle
   return (
     <div>
-      {error && (
-        <p className="mb-3 text-sm text-destructive">{error}</p>
-      )}
+      {error && <p className="mb-3 text-sm text-destructive">{error}</p>}
       <button
         type="button"
         onClick={handleOpen}
