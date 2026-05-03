@@ -23,6 +23,13 @@ interface VideoUploaderProps {
   existingPlaybackId?: string | null
   /** Called once the video is ready so the parent form can update its state */
   onVideoReady?: (playbackId: string, assetId: string) => void
+  /**
+   * When true the uploader skips saving the video to doula_profiles.
+   * Use this when the video is being recorded for a message, not a profile.
+   */
+  skipProfilePersist?: boolean
+  /** Called when the user resets/cancels the uploader */
+  onReset?: () => void
 }
 
 const MAX_POLL_ATTEMPTS = 40   // 40 × 3 s = 2 minutes
@@ -30,7 +37,7 @@ const POLL_INTERVAL_MS  = 3000
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-export function VideoUploader({ existingPlaybackId, onVideoReady }: VideoUploaderProps) {
+export function VideoUploader({ existingPlaybackId, onVideoReady, skipProfilePersist, onReset }: VideoUploaderProps) {
   const [state, setState] = useState<UploadState>({
     phase:      existingPlaybackId ? 'ready' : 'idle',
     progress:   0,
@@ -78,6 +85,7 @@ export function VideoUploader({ existingPlaybackId, onVideoReady }: VideoUploade
       phase: 'idle', progress: 0,
       uploadId: null, playbackId: null, assetId: null, error: null,
     })
+    onReset?.()
   }
 
   // ── Save to Supabase ───────────────────────────────────────────────────────
@@ -121,7 +129,7 @@ export function VideoUploader({ existingPlaybackId, onVideoReady }: VideoUploade
 
         if (data.status === 'ready') {
           clearInterval(pollTimerRef.current!)
-          await persistVideoToProfile(data.playbackId)
+          if (!skipProfilePersist) await persistVideoToProfile(data.playbackId)
           onVideoReady?.(data.playbackId, data.assetId)
           setState(prev => ({
             ...prev,
