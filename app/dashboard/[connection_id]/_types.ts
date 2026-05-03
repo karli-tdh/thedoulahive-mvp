@@ -21,6 +21,11 @@ export interface ThreadData {
   current_user_name: string | null
   connection_id:     string
   messages:          ThreadMessage[]
+  /** Only populated for doulas — null on the family side */
+  family_context: {
+    family_video_id: string | null
+    reaction_note:   string | null
+  } | null
   doula_contact: {
     phone:   string | null
     email:   string | null

@@ -25,6 +25,35 @@ function formatTimestamp(dateStr: string): string {
   return `${date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} ${time}`
 }
 
+// ── Family context card (doula-only, pinned above messages) ──────────────────
+
+function FamilyContextCard({
+  videoId,
+  reactionNote,
+}: {
+  videoId:      string | null
+  reactionNote: string | null
+}) {
+  // Don't render if there's nothing to show
+  if (!videoId && !reactionNote) return null
+
+  return (
+    <div className="rounded-2xl border border-border bg-muted/30 overflow-hidden">
+      {videoId && <VideoPlayer playbackId={videoId} />}
+      <div className="px-4 py-3 space-y-1.5">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          Why they reached out
+        </p>
+        {reactionNote ? (
+          <p className="text-sm text-foreground/80">{reactionNote}</p>
+        ) : (
+          <p className="text-sm italic text-muted-foreground">No message left.</p>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ── Message cards ─────────────────────────────────────────────────────────────
 
 function VideoMessageCard({ msg }: { msg: ThreadMessage }) {
@@ -182,7 +211,7 @@ export function ConversationThread({
   currentUserId: string
   connectionId: string
 }) {
-  const { role, other_name, other_location, current_user_name, doula_contact } = initialData
+  const { role, other_name, other_location, current_user_name, doula_contact, family_context } = initialData
 
   // ── State ─────────────────────────────────────────────────────────────────
 
@@ -403,6 +432,24 @@ export function ConversationThread({
           className="flex-1 overflow-y-auto"
         >
           <div className="mx-auto max-w-2xl space-y-4 px-4 py-6">
+
+            {/* Pinned context card — doula only */}
+            {role === 'doula' && family_context && (
+              <>
+                <FamilyContextCard
+                  videoId={family_context.family_video_id}
+                  reactionNote={family_context.reaction_note}
+                />
+                {/* Visual separator between context and conversation */}
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 border-t border-border" />
+                  <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Conversation
+                  </span>
+                  <div className="flex-1 border-t border-border" />
+                </div>
+              </>
+            )}
 
             {messages.length === 0 ? (
               /* Empty thread state */
