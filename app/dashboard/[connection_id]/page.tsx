@@ -2,34 +2,10 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { ConversationThread } from './_components/conversation-thread'
+import type { ThreadData } from './_types'
 
-// ── Types (exported for the client component) ─────────────────────────────────
-
-export interface ThreadMessage {
-  id:           string
-  sender_id:    string
-  sender_name:  string | null
-  message_type: 'video' | 'text' | 'contact_share'
-  video_id:     string | null
-  video_url:    string | null
-  body:         string | null
-  created_at:   string
-  is_mine:      boolean
-}
-
-export interface ThreadData {
-  role:              'doula' | 'family'
-  other_name:        string | null
-  other_location:    string | null
-  current_user_name: string | null
-  connection_id:     string
-  messages:          ThreadMessage[]
-  doula_contact: {
-    phone:   string | null
-    email:   string | null
-    website: string | null
-  } | null
-}
+// Re-export so callers that already imported from here don't break
+export type { ThreadData, ThreadMessage } from './_types'
 
 // ── Error page ────────────────────────────────────────────────────────────────
 
@@ -37,9 +13,7 @@ function ThreadError({ message }: { message: string }) {
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center px-4 text-center">
       <p className="text-sm font-medium text-foreground">Could not load conversation</p>
-      <p className="mt-2 text-xs text-muted-foreground">
-        {message}
-      </p>
+      <p className="mt-2 text-xs text-muted-foreground">{message}</p>
       <Link
         href="/dashboard"
         className="mt-6 rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"

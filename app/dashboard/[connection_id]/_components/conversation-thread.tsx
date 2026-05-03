@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { VideoPlayer } from '@/components/video/VideoPlayer'
 import { VideoUploader } from '@/components/video/VideoUploader'
-import type { ThreadData, ThreadMessage } from '../page'
+import type { ThreadData, ThreadMessage } from '../_types'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
