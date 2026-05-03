@@ -10,9 +10,10 @@ import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.
  * - role = 'family', no completed onboarding
  *   (no family_profiles row, or due_date is null)
  *                              → /onboarding/family
- * - role = 'family', onboarding complete
- *   (family_profiles row exists with due_date set)
+ * - role = 'family', onboarding complete, no connections yet
  *                              → /doulas
+ * - role = 'family', onboarding complete, has connections
+ *                              → /dashboard
  */
 export async function redirectByRole(
   supabase: SupabaseClient,
@@ -50,19 +51,27 @@ export async function redirectByRole(
     return
   }
 
-  // Family: check whether onboarding has been completed.
-  // due_date is the first required field — if it's set, onboarding is done.
+  // Family: check onboarding completion, then connection state.
+  // due_date is the first required field — if it's null, onboarding isn't done.
   const { data: familyProfile } = await supabase
     .from('family_profiles')
-    .select('due_date')
+    .select('id, due_date')
     .eq('user_id', user.id)
     .maybeSingle()
 
-  if (familyProfile?.due_date) {
-    router.push('/doulas')
-  } else {
+  if (!familyProfile?.due_date) {
+    // No profile row, or onboarding not yet completed
     router.push('/onboarding/family')
+    router.refresh()
+    return
   }
 
+  // Onboarding done — go to dashboard if they have connections, otherwise browse
+  const { count } = await supabase
+    .from('connections')
+    .select('id', { count: 'exact', head: true })
+    .eq('family_id', familyProfile.id)
+
+  router.push((count ?? 0) > 0 ? '/dashboard' : '/doulas')
   router.refresh()
 }
