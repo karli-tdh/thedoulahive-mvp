@@ -65,54 +65,59 @@ export default function Home() {
         {/* Left column (text) */}
         <div className="relative flex flex-col justify-center overflow-hidden bg-cotton px-8 py-16 lg:order-1 lg:w-1/2 lg:px-16 lg:py-20">
 
-          {/* Eyebrow */}
-          <p className="mb-6 font-abel text-xs font-bold uppercase tracking-[0.18em] text-dark-green">
-            Find your doula
-          </p>
-
-          {/* Logo as hero statement */}
-          <div className="w-[280px] lg:w-[320px]">
-            <Image
-              src="/logos/DH_Primary_multi01.png"
-              alt="The Doula Hive"
-              width={340}
-              height={340}
-              className="w-full"
-              priority
-            />
-          </div>
-
-          {/* Subheading */}
-          <p className="mt-6 max-w-[420px] font-abel text-lg leading-relaxed text-dark-green/80">
-            The right doula is out there. Video profiles help you feel it before you make the call.
-          </p>
-
-          {/* Buttons */}
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-            <Link
-              href="/doulas"
-              className="inline-flex items-center justify-center rounded-xl bg-dark-green px-7 py-3 font-abel text-base font-bold text-cotton transition-opacity duration-200 hover:opacity-85"
-            >
-              Find a doula
-            </Link>
-            <Link
-              href="/signup"
-              className="inline-flex items-center justify-center rounded-xl border-2 border-dark-green bg-transparent px-7 py-3 font-abel text-base font-bold text-dark-green transition-all duration-200 hover:border-light-pink hover:bg-light-pink"
-            >
-              Join as a doula
-            </Link>
-          </div>
-
-          {/* Honeycomb shape02 — top-left, absolute, full colour — hidden on mobile */}
-          <div className="pointer-events-none absolute left-0 top-0 hidden w-[440px] select-none lg:block">
+          {/* Honeycomb shape02 — top-left, z-0 so it sits behind content — hidden on mobile */}
+          <div className="pointer-events-none absolute left-0 top-0 z-0 hidden w-[440px] select-none lg:block">
             <Image
               src="/shapes/honeycombe_shape02_yellow.png"
               alt=""
-              width={220}
-              height={220}
+              width={440}
+              height={440}
               className="w-full"
               aria-hidden
             />
+          </div>
+
+          {/* Content sits above honeycomb */}
+          <div className="relative z-10">
+
+            {/* Eyebrow */}
+            <p className="mb-6 font-abel text-xs font-bold uppercase tracking-[0.18em] text-dark-green">
+              Find your doula
+            </p>
+
+            {/* Logo as hero statement */}
+            <div className="w-[280px] lg:w-[320px]">
+              <Image
+                src="/logos/DH_Primary_multi01.png"
+                alt="The Doula Hive"
+                width={340}
+                height={340}
+                className="w-full"
+                priority
+              />
+            </div>
+
+            {/* Subheading */}
+            <p className="mt-6 max-w-[420px] font-abel text-lg leading-relaxed text-dark-green/80">
+              The right doula is out there. Video profiles help you feel it before you make the call.
+            </p>
+
+            {/* Buttons */}
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+              <Link
+                href="/doulas"
+                className="inline-flex items-center justify-center rounded-xl bg-dark-green px-7 py-3 font-abel text-base font-bold text-cotton transition-opacity duration-200 hover:opacity-85"
+              >
+                Find a doula
+              </Link>
+              <Link
+                href="/signup"
+                className="inline-flex items-center justify-center rounded-xl border-2 border-dark-green bg-transparent px-7 py-3 font-abel text-base font-bold text-dark-green transition-all duration-200 hover:border-light-pink hover:bg-light-pink"
+              >
+                Join as a doula
+              </Link>
+            </div>
+
           </div>
         </div>
       </section>
@@ -120,7 +125,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════════════════
           SECTION 2  —  DARK GREEN BAND
       ═══════════════════════════════════════════════════════════════════ */}
-      <section className="bg-dark-green px-6 py-12 text-center">
+      <section className="px-6 py-12 text-center" style={{ backgroundColor: '#07403B' }}>
         <h2 className="font-arinoe text-[28px] text-cotton lg:text-[40px]">
           Birth is better together.
         </h2>
@@ -143,8 +148,8 @@ export default function Home() {
           {/* Two-column grid */}
           <div className="grid items-center gap-12 lg:grid-cols-2">
 
-            {/* Left: image */}
-            <div className="w-full overflow-hidden rounded-xl">
+            {/* Left: image with honeycomb strip overlay */}
+            <div className="relative w-full overflow-hidden rounded-xl">
               <Image
                 src="/images/Family-with-baby.png"
                 alt="Family with baby"
@@ -153,6 +158,24 @@ export default function Home() {
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="w-full object-cover"
               />
+              {/* Honeycomb strip — rotated 90°, rises from bottom-left corner */}
+              <div
+                className="pointer-events-none absolute bottom-0 left-0 select-none opacity-85"
+                style={{
+                  transform: 'rotate(90deg)',
+                  transformOrigin: 'bottom left',
+                  maxWidth: '480px',
+                }}
+              >
+                <Image
+                  src="/shapes/honeycombe_strip_yellow.png"
+                  alt=""
+                  width={480}
+                  height={96}
+                  className="w-full"
+                  aria-hidden
+                />
+              </div>
             </div>
 
             {/* Right: steps */}
