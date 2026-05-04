@@ -24,13 +24,39 @@ function shortSetting(s: string) {
   return s
 }
 
+// ── Badge pill colours (brand-coded) ────────────────────────────────────────
+
+function SupportBadge({ label }: { label: string }) {
+  return (
+    <span className="rounded-full bg-light-pink/30 px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green border border-light-pink/60">
+      {label}
+    </span>
+  )
+}
+
+function BirthSettingBadge({ label }: { label: string }) {
+  return (
+    <span className="rounded-full bg-light-blue/30 px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green border border-light-blue/60">
+      {shortSetting(label)}
+    </span>
+  )
+}
+
+function SpecialismBadge({ label }: { label: string }) {
+  return (
+    <span className="rounded-full bg-olive/15 px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green border border-olive/40">
+      {label}
+    </span>
+  )
+}
+
 // ── Component ────────────────────────────────────────────────────────────────
 
 export function DoulaCard({ doula }: { doula: DoulaListItem }) {
   const [showVideo, setShowVideo] = useState(false)
 
-  const name     = doula.profiles?.full_name ?? 'Doula'
-  const location = doula.profiles?.location
+  const name           = doula.profiles?.full_name ?? 'Doula'
+  const location       = doula.profiles?.location
   const topSpecialisms = (doula.specialisms ?? []).slice(0, 3)
   const extraCount     = Math.max(0, (doula.specialisms?.length ?? 0) - 3)
 
@@ -44,7 +70,7 @@ export function DoulaCard({ doula }: { doula: DoulaListItem }) {
         />
       )}
 
-      <article className="flex flex-col rounded-2xl border border-border bg-card hover:border-foreground/25 transition-colors overflow-hidden">
+      <article className="card-hover flex flex-col rounded-xl border-2 border-dark-green bg-card overflow-hidden">
 
         {/* Thumbnail — clicking navigates to profile page */}
         <Link
@@ -62,14 +88,13 @@ export function DoulaCard({ doula }: { doula: DoulaListItem }) {
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
               />
-              {/* Decorative play badge — indicates video exists, but click goes to profile */}
+              {/* Decorative play badge */}
               <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/25 transition-colors">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-lg ring-1 ring-black/10">
-                  {/* Play triangle — optically nudged right to look centred */}
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-lg ring-2 ring-dark-green/20">
                   <svg
                     viewBox="0 0 24 24"
                     fill="currentColor"
-                    className="h-6 w-6 translate-x-0.5 text-gray-800"
+                    className="h-6 w-6 translate-x-0.5 text-dark-green"
                     aria-hidden
                   >
                     <path d="M8 5v14l11-7z" />
@@ -89,38 +114,28 @@ export function DoulaCard({ doula }: { doula: DoulaListItem }) {
           <div>
             <Link
               href={`/doulas/${doula.id}`}
-              className="font-semibold text-foreground hover:underline underline-offset-2"
+              className="font-arinoe text-lg text-dark-green hover:underline underline-offset-2"
             >
               {name}
             </Link>
             {location && (
-              <p className="mt-0.5 text-sm text-muted-foreground">{location}</p>
+              <p className="mt-0.5 text-sm text-muted-foreground font-abel">{location}</p>
             )}
           </div>
 
           {/* Tagline */}
           {doula.tagline && (
-            <p className="text-sm text-foreground/80 line-clamp-2">{doula.tagline}</p>
+            <p className="text-sm text-dark-green/80 line-clamp-2 font-abel">{doula.tagline}</p>
           )}
 
           {/* Support type + birth setting badges */}
           {((doula.support_types?.length ?? 0) > 0 || (doula.birth_settings?.length ?? 0) > 0) && (
             <div className="flex flex-wrap gap-1.5">
               {doula.support_types?.map((t) => (
-                <span
-                  key={t}
-                  className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary"
-                >
-                  {t}
-                </span>
+                <SupportBadge key={t} label={t} />
               ))}
               {doula.birth_settings?.map((s) => (
-                <span
-                  key={s}
-                  className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
-                >
-                  {shortSetting(s)}
-                </span>
+                <BirthSettingBadge key={s} label={s} />
               ))}
             </div>
           )}
@@ -129,15 +144,10 @@ export function DoulaCard({ doula }: { doula: DoulaListItem }) {
           {topSpecialisms.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {topSpecialisms.map((s) => (
-                <span
-                  key={s}
-                  className="rounded-full border border-border px-2.5 py-0.5 text-xs text-foreground/70"
-                >
-                  {s}
-                </span>
+                <SpecialismBadge key={s} label={s} />
               ))}
               {extraCount > 0 && (
-                <span className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted-foreground">
+                <span className="rounded-full border border-dark-green/30 px-2.5 py-0.5 text-xs text-dark-green/60 font-abel">
                   +{extraCount} more
                 </span>
               )}
@@ -145,9 +155,9 @@ export function DoulaCard({ doula }: { doula: DoulaListItem }) {
           )}
 
           {/* Footer: price + actions */}
-          <div className="mt-auto flex items-center justify-between pt-3 border-t border-border">
+          <div className="mt-auto flex items-center justify-between pt-3 border-t border-dark-green/20">
             {doula.price_range ? (
-              <span className="text-sm font-medium text-foreground">{doula.price_range}</span>
+              <span className="text-sm font-medium text-dark-green font-abel">{doula.price_range}</span>
             ) : (
               <span />
             )}
@@ -157,14 +167,14 @@ export function DoulaCard({ doula }: { doula: DoulaListItem }) {
                 <button
                   type="button"
                   onClick={() => setShowVideo(true)}
-                  className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
+                  className="rounded-lg border-2 border-dark-green px-3 py-1.5 text-xs font-abel font-medium text-dark-green hover:bg-dark-green hover:text-cotton transition-colors"
                 >
                   Watch intro
                 </button>
               )}
               <Link
                 href={`/doulas/${doula.id}`}
-                className="rounded-lg bg-foreground px-3 py-1.5 text-xs font-medium text-background hover:opacity-80 transition-opacity"
+                className="rounded-lg bg-dark-green px-3 py-1.5 text-xs font-abel font-medium text-cotton hover:opacity-85 transition-opacity"
               >
                 View profile
               </Link>

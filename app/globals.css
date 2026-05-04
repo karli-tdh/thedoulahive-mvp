@@ -2,25 +2,127 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ═══════════════════════════════════════════════════════════════════
+   Fonts
+═══════════════════════════════════════════════════════════════════ */
+
+@font-face {
+  font-family: 'Arinoe';
+  src: url('/fonts/Arinoe/Web Fonts/arinoe_regular-webfont.woff2') format('woff2'),
+       url('/fonts/Arinoe/Web Fonts/arinoe_regular-webfont.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@font-face {
+  font-family: 'Abel';
+  src: url('/fonts/Abel - Google Font/Abel-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Brand tokens  (shadcn/ui–compatible)
+═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Raw palette ─────────────────────────────────── */
+  --dark-green:   #00594F;
+  --cotton:       #F9F4E0;
+  --sunny-yellow: #FFE404;
+  --light-pink:   #F693C1;
+  --olive:        #95A733;
+  --brand-orange: #FE7040;
+  --soft-yellow:  #FFF077;
+  --popping-pink: #F55CB1;
+  --light-blue:   #90EBD2;
+  --near-black:   #1a1a1a;
+
+  /* ── shadcn/ui token overrides ───────────────────── */
+  --background:             var(--cotton);
+  --foreground:             var(--dark-green);
+
+  --card:                   #ffffff;
+  --card-foreground:        var(--dark-green);
+
+  --popover:                #ffffff;
+  --popover-foreground:     var(--dark-green);
+
+  --primary:                var(--dark-green);
+  --primary-foreground:     var(--cotton);
+
+  --secondary:              var(--olive);
+  --secondary-foreground:   #ffffff;
+
+  --muted:                  #e8e3cc;
+  --muted-foreground:       #5a7060;
+
+  --accent:                 var(--light-blue);
+  --accent-foreground:      var(--dark-green);
+
+  --destructive:            #dc2626;
+  --destructive-foreground: #ffffff;
+
+  --border:                 var(--dark-green);
+  --input:                  var(--dark-green);
+  --ring:                   var(--dark-green);
+
+  --radius:                 0.75rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Base
+═══════════════════════════════════════════════════════════════════ */
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--cotton);
+  color: var(--dark-green);
+  font-family: 'Abel', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Arinoe', serif;
+  color: var(--dark-green);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Utilities
+═══════════════════════════════════════════════════════════════════ */
+
 @layer utilities {
+  .font-arinoe {
+    font-family: 'Arinoe', serif;
+  }
+
+  .font-abel {
+    font-family: 'Abel', system-ui, sans-serif;
+  }
+
+  /* Card hover — translateY + offset shadow */
+  .card-hover {
+    transition: transform 150ms ease, box-shadow 150ms ease;
+  }
+  .card-hover:hover {
+    transform: translateY(-3px);
+    box-shadow: 4px 4px 0px var(--dark-green);
+  }
+
+  /* Turn banners */
+  .banner-your-turn {
+    background-color: var(--sunny-yellow);
+    border: 2px solid var(--dark-green);
+    border-radius: 0.75rem;
+  }
+  .banner-waiting {
+    background-color: #ffffff;
+    border: 2px solid var(--dark-green);
+    border-radius: 0.75rem;
+  }
+
   .text-balance {
     text-wrap: balance;
   }

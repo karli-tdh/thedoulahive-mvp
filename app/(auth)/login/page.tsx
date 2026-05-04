@@ -20,9 +20,9 @@ import {
 export default function LoginPage() {
   const router = useRouter()
 
-  const [email, setEmail] = useState('')
+  const [email, setEmail]     = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError]     = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
   async function handleLogin(e: React.FormEvent) {
@@ -32,10 +32,7 @@ export default function LoginPage() {
 
     const supabase = createClient()
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
 
     if (signInError) {
       setError(signInError.message)
@@ -43,27 +40,26 @@ export default function LoginPage() {
       return
     }
 
-    // Read the profile role and redirect accordingly
     await redirectByRole(supabase, router)
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Welcome back</CardTitle>
-        <CardDescription>Log in to your Doula Hive account</CardDescription>
+        <CardTitle className="font-arinoe text-3xl">Welcome back</CardTitle>
+        <CardDescription className="font-abel">Log in to your Doula Hive account</CardDescription>
       </CardHeader>
 
       <form onSubmit={handleLogin}>
         <CardContent className="space-y-4">
           {error && (
-            <div className="rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            <div className="rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm font-abel text-destructive">
               {error}
             </div>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" className="font-abel">Email</Label>
             <Input
               id="email"
               type="email"
@@ -76,7 +72,7 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" className="font-abel">Password</Label>
             <Input
               id="password"
               type="password"
@@ -90,15 +86,12 @@ export default function LoginPage() {
         </CardContent>
 
         <CardFooter className="flex flex-col gap-4">
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full font-abel" disabled={loading}>
             {loading ? 'Logging in…' : 'Log in'}
           </Button>
-          <p className="text-center text-sm text-muted-foreground">
+          <p className="text-center text-sm font-abel text-muted-foreground">
             Don&apos;t have an account?{' '}
-            <Link
-              href="/signup"
-              className="underline underline-offset-4 hover:text-foreground"
-            >
+            <Link href="/signup" className="underline underline-offset-4 hover:text-dark-green">
               Sign up
             </Link>
           </p>

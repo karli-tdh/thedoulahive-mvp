@@ -38,9 +38,9 @@ function turnLabel(
 
 function PendingCard({ conn }: { conn: DoulaConnection }) {
   const router = useRouter()
-  const [expanded, setExpanded]       = useState(false)
-  const [declining, setDeclining]     = useState(false) // show inline confirm
-  const [isPending, startTransition]  = useTransition()
+  const [expanded, setExpanded]      = useState(false)
+  const [declining, setDeclining]    = useState(false)
+  const [isPending, startTransition] = useTransition()
 
   const dueDate     = formatDueDate(conn.due_date)
   const textPreview = conn.what_they_want?.slice(0, 160) ?? null
@@ -61,23 +61,23 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
   }
 
   return (
-    <article className="rounded-2xl border border-border bg-card overflow-hidden">
+    <article className="card-hover rounded-xl border-2 border-dark-green bg-card overflow-hidden">
 
       {/* Family intro video */}
       {conn.family_video_id && (
-        <div className="border-b border-border">
+        <div className="border-b-2 border-dark-green/30">
           <VideoPlayer playbackId={conn.family_video_id} />
         </div>
       )}
 
       <div className="p-5 space-y-4">
 
-        {/* Header row: name + timestamp */}
+        {/* Header row */}
         <div className="flex items-start justify-between gap-3">
-          <p className="font-semibold text-foreground">
+          <p className="font-arinoe text-xl text-dark-green">
             {conn.family_name ?? 'A family'}
           </p>
-          <span className="shrink-0 text-xs text-muted-foreground">
+          <span className="shrink-0 text-xs font-abel text-muted-foreground">
             {daysAgo(conn.initiated_at)}
           </span>
         </div>
@@ -85,12 +85,12 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
         {/* Pills */}
         <div className="flex flex-wrap gap-2">
           {dueDate && (
-            <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-foreground">
+            <span className="rounded-full bg-soft-yellow/60 border border-soft-yellow px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green">
               Due {dueDate}
             </span>
           )}
           {conn.birth_setting && (
-            <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+            <span className="rounded-full bg-light-blue/30 border border-light-blue px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green">
               {conn.birth_setting}
             </span>
           )}
@@ -98,22 +98,22 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
 
         {/* Reaction note */}
         {conn.reaction_note && (
-          <blockquote className="border-l-2 border-border pl-3 text-sm italic text-muted-foreground">
+          <blockquote className="border-l-4 border-light-pink pl-3 text-sm font-abel italic text-dark-green/70">
             &ldquo;{conn.reaction_note}&rdquo;
           </blockquote>
         )}
 
-        {/* What they want — truncated, expandable */}
+        {/* What they want */}
         {textFull && (
           <div>
-            <p className="text-sm text-foreground/80">
+            <p className="text-sm font-abel text-dark-green/80">
               {expanded || !needsMore ? textFull : `${textPreview}…`}
             </p>
             {needsMore && !expanded && (
               <button
                 type="button"
                 onClick={() => setExpanded(true)}
-                className="mt-1 text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+                className="mt-1 text-xs font-abel text-dark-green/60 underline underline-offset-4 hover:text-dark-green"
               >
                 View more
               </button>
@@ -121,22 +121,21 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
           </div>
         )}
 
-        {/* Expanded: pregnancy notes */}
+        {/* Expanded pregnancy notes */}
         {expanded && conn.pregnancy_notes && (
-          <div className="rounded-xl bg-muted/50 p-3">
-            <p className="mb-1 flex items-center gap-1 text-xs font-medium text-muted-foreground">
+          <div className="rounded-xl bg-muted/60 border border-dark-green/20 p-3">
+            <p className="mb-1 flex items-center gap-1 text-xs font-abel font-medium text-muted-foreground">
               <span>🔒</span> Private
             </p>
-            <p className="text-sm text-foreground/80">{conn.pregnancy_notes}</p>
+            <p className="text-sm font-abel text-dark-green/80">{conn.pregnancy_notes}</p>
           </div>
         )}
 
-        {/* Collapse button */}
         {expanded && (
           <button
             type="button"
             onClick={() => setExpanded(false)}
-            className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+            className="text-xs font-abel text-dark-green/60 underline underline-offset-4 hover:text-dark-green"
           >
             Show less
           </button>
@@ -145,21 +144,20 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
         {/* Actions */}
         <div className="flex flex-wrap items-center gap-3 pt-1">
           {declining ? (
-            /* Inline decline confirm */
             <div className="flex items-center gap-3">
-              <p className="text-sm text-foreground">Are you sure?</p>
+              <p className="text-sm font-abel text-dark-green">Are you sure?</p>
               <button
                 type="button"
                 disabled={isPending}
                 onClick={() => respond('declined')}
-                className="rounded-lg bg-foreground px-3 py-1.5 text-xs font-medium text-background hover:opacity-80 transition-opacity disabled:opacity-50"
+                className="rounded-lg bg-dark-green px-3 py-1.5 text-xs font-abel font-medium text-cotton hover:opacity-80 transition-opacity disabled:opacity-50"
               >
                 {isPending ? 'Declining…' : 'Confirm'}
               </button>
               <button
                 type="button"
                 onClick={() => setDeclining(false)}
-                className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+                className="text-xs font-abel text-dark-green/60 underline underline-offset-4 hover:text-dark-green"
               >
                 Cancel
               </button>
@@ -170,7 +168,7 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
                 type="button"
                 disabled={isPending}
                 onClick={() => respond('accepted')}
-                className="rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-80 transition-opacity disabled:opacity-50"
+                className="rounded-lg bg-dark-green px-4 py-2 text-sm font-abel font-medium text-cotton hover:opacity-80 transition-opacity disabled:opacity-50"
               >
                 {isPending ? 'Saving…' : 'Start conversation'}
               </button>
@@ -178,7 +176,7 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
                 type="button"
                 disabled={isPending}
                 onClick={() => setDeclining(true)}
-                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors disabled:opacity-50"
+                className="rounded-lg border-2 border-dark-green px-4 py-2 text-sm font-abel font-medium text-dark-green hover:bg-light-pink/20 transition-colors disabled:opacity-50"
               >
                 Not available
               </button>
@@ -193,43 +191,33 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
 
 // ── Active connection row ─────────────────────────────────────────────────────
 
-function ActiveRow({
-  conn,
-  userId,
-}: {
-  conn: DoulaConnection
-  userId: string
-}) {
+function ActiveRow({ conn, userId }: { conn: DoulaConnection; userId: string }) {
   const dueDate = formatDueDate(conn.due_date)
   const turn    = turnLabel(conn.last_message_sender_id, userId, conn.family_name)
 
   return (
-    <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-card px-5 py-4">
+    <div className="card-hover flex items-center justify-between gap-4 rounded-xl border-2 border-dark-green bg-card px-5 py-4">
       <div className="min-w-0">
-        <p className="font-medium text-foreground truncate">
+        <p className="font-arinoe text-lg text-dark-green truncate">
           {conn.family_name ?? 'A family'}
         </p>
         <div className="mt-1 flex flex-wrap items-center gap-2">
           {dueDate && (
-            <span className="text-xs text-muted-foreground">Due {dueDate}</span>
+            <span className="text-xs font-abel text-muted-foreground">Due {dueDate}</span>
           )}
           {conn.birth_setting && (
-            <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+            <span className="rounded-full bg-light-blue/20 px-2 py-0.5 text-xs font-abel text-dark-green">
               {conn.birth_setting}
             </span>
           )}
-          <span
-            className={`text-xs font-medium ${
-              turn.yours ? 'text-primary' : 'text-muted-foreground'
-            }`}
-          >
+          <span className={`text-xs font-abel font-medium ${turn.yours ? 'text-olive' : 'text-muted-foreground'}`}>
             {turn.label}
           </span>
         </div>
       </div>
       <Link
         href={`/dashboard/${conn.id}`}
-        className="shrink-0 rounded-lg bg-foreground px-3 py-1.5 text-xs font-medium text-background hover:opacity-80 transition-opacity"
+        className="shrink-0 rounded-lg bg-dark-green px-3 py-1.5 text-xs font-abel font-medium text-cotton hover:opacity-80 transition-opacity"
       >
         Open conversation
       </Link>
@@ -248,16 +236,8 @@ export function DoulaDashboard({
   userId: string
   saved: boolean
 }) {
-  const router = useRouter()
-  const pending  = data.connections.filter((c) => c.status === 'pending')
-  const active   = data.connections.filter((c) => c.status === 'accepted')
-
-  async function handleLogout() {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push('/login')
-    router.refresh()
-  }
+  const pending = data.connections.filter((c) => c.status === 'pending')
+  const active  = data.connections.filter((c) => c.status === 'accepted')
 
   return (
     <main className="mx-auto min-h-screen max-w-3xl px-4 py-10 sm:px-6">
@@ -265,52 +245,45 @@ export function DoulaDashboard({
 
       <div className="space-y-8">
 
-        {/* Saved-profile banner */}
+        {/* Profile-saved banner */}
         {saved && (
-          <div className="rounded-xl bg-muted px-6 py-4 text-center text-sm text-foreground">
-            Your profile is saved. Go live whenever you&apos;re ready.
+          <div className="rounded-xl border-2 border-dark-green bg-soft-yellow/60 px-6 py-4 text-center">
+            <p className="text-sm font-abel text-dark-green">
+              Your profile is saved. Go live whenever you&apos;re ready.
+            </p>
           </div>
         )}
 
         {/* Header */}
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
-            {!data.is_published && (
-              <p className="mt-1 text-sm text-muted-foreground">
-                Your profile isn&apos;t published yet —{' '}
-                <Link href="/onboarding/doula" className="underline underline-offset-4 hover:text-foreground">
-                  complete your profile
-                </Link>{' '}
-                to appear in search.
-              </p>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="shrink-0 text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
-          >
-            Log out
-          </button>
+        <div>
+          <h1 className="font-arinoe text-4xl text-dark-green">Dashboard</h1>
+          {!data.is_published && (
+            <p className="mt-2 text-sm font-abel text-muted-foreground">
+              Your profile isn&apos;t published yet —{' '}
+              <Link href="/onboarding/doula" className="underline underline-offset-4 hover:text-dark-green">
+                complete your profile
+              </Link>{' '}
+              to appear in search.
+            </p>
+          )}
         </div>
 
         {/* ── Pending requests ─────────────────────────────────────────────── */}
         <section>
-          <h2 className="mb-4 text-lg font-semibold text-foreground">
+          <h2 className="mb-4 font-arinoe text-2xl text-dark-green flex items-center gap-2">
             Connection requests
             {pending.length > 0 && (
-              <span className="ml-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-popping-pink text-[11px] font-abel font-bold text-white">
                 {pending.length}
               </span>
             )}
           </h2>
 
           {pending.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-10 text-center">
-              <p className="text-sm font-medium text-foreground">No connection requests yet.</p>
+            <div className="rounded-xl border-2 border-dashed border-dark-green/30 bg-muted/30 px-6 py-10 text-center">
+              <p className="text-sm font-abel font-medium text-dark-green">No connection requests yet.</p>
               {!data.is_published && (
-                <p className="mt-2 text-sm text-muted-foreground">
+                <p className="mt-2 text-sm font-abel text-muted-foreground">
                   You&apos;ll only appear in search once your profile is published.
                 </p>
               )}
@@ -324,10 +297,10 @@ export function DoulaDashboard({
           )}
         </section>
 
-        {/* ── Active conversations ──────────────────────────────────────────── */}
+        {/* ── Active conversations ────────────────────────────────────────── */}
         {active.length > 0 && (
           <section>
-            <h2 className="mb-4 text-lg font-semibold text-foreground">Active conversations</h2>
+            <h2 className="mb-4 font-arinoe text-2xl text-dark-green">Active conversations</h2>
             <div className="space-y-3">
               {active.map((conn) => (
                 <ActiveRow key={conn.id} conn={conn} userId={userId} />

@@ -37,16 +37,43 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Badge components (brand-coded) ───────────────────────────────────────────
 
-function Badge({ label, variant = 'primary' }: { label: string; variant?: 'primary' | 'muted' | 'outline' }) {
-  const styles = {
-    primary: 'bg-primary/10 text-primary',
-    muted:   'bg-muted text-muted-foreground',
-    outline: 'border border-border text-foreground/70',
-  }
+function SupportBadge({ label }: { label: string }) {
   return (
-    <span className={`rounded-full px-3 py-1 text-xs font-medium ${styles[variant]}`}>
+    <span className="rounded-full bg-light-pink/30 border border-light-pink px-3 py-1 text-xs font-abel font-medium text-dark-green">
+      {label}
+    </span>
+  )
+}
+
+function BirthSettingBadge({ label }: { label: string }) {
+  return (
+    <span className="rounded-full bg-light-blue/30 border border-light-blue px-3 py-1 text-xs font-abel font-medium text-dark-green">
+      {label}
+    </span>
+  )
+}
+
+function SpecialismBadge({ label }: { label: string }) {
+  return (
+    <span className="rounded-full bg-olive/15 border border-olive/50 px-3 py-1 text-xs font-abel font-medium text-dark-green">
+      {label}
+    </span>
+  )
+}
+
+function TrainingBadge({ label }: { label: string }) {
+  return (
+    <span className="rounded-full bg-brand-orange/15 border border-brand-orange/40 px-3 py-1 text-xs font-abel font-medium text-dark-green">
+      {label}
+    </span>
+  )
+}
+
+function LanguageBadge({ label }: { label: string }) {
+  return (
+    <span className="rounded-full bg-soft-yellow/60 border border-soft-yellow px-3 py-1 text-xs font-abel font-medium text-dark-green">
       {label}
     </span>
   )
@@ -58,8 +85,8 @@ function DetailRow({ label, value }: { label: string; value: string | string[] |
   const display = Array.isArray(value) ? value.join(', ') : String(value)
   return (
     <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-4">
-      <dt className="w-44 shrink-0 text-sm font-medium text-foreground">{label}</dt>
-      <dd className="text-sm text-muted-foreground">{display}</dd>
+      <dt className="w-44 shrink-0 text-sm font-abel font-medium text-dark-green">{label}</dt>
+      <dd className="text-sm font-abel text-muted-foreground">{display}</dd>
     </div>
   )
 }
@@ -103,19 +130,19 @@ export default async function DoulaProfilePage({ params }: PageProps) {
 
       {/* ── 1. Intro video ─────────────────────────────────────────────── */}
       {doula.intro_video_id && (
-        <div className="mb-10 overflow-hidden rounded-2xl">
+        <div className="mb-10 overflow-hidden rounded-xl border-2 border-dark-green">
           <VideoPlayer playbackId={doula.intro_video_id} />
         </div>
       )}
 
       {/* ── 2. Name + location + tagline ───────────────────────────────── */}
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-foreground sm:text-3xl">{name}</h1>
+        <h1 className="font-arinoe text-4xl text-dark-green sm:text-5xl">{name}</h1>
         {location && (
-          <p className="mt-1 text-base text-muted-foreground">{location}</p>
+          <p className="mt-2 text-base font-abel text-muted-foreground">{location}</p>
         )}
         {doula.tagline && (
-          <p className="mt-3 text-base text-foreground/80">{doula.tagline}</p>
+          <p className="mt-3 text-base font-abel text-dark-green/80">{doula.tagline}</p>
         )}
       </div>
 
@@ -131,8 +158,8 @@ export default async function DoulaProfilePage({ params }: PageProps) {
       {/* ── 4. Bio ─────────────────────────────────────────────────────── */}
       {doula.bio && (
         <section className="mb-10">
-          <h2 className="mb-3 text-lg font-semibold text-foreground">About my work</h2>
-          <p className="whitespace-pre-line text-sm leading-relaxed text-foreground/80">
+          <h2 className="mb-3 font-arinoe text-2xl text-dark-green">About my work</h2>
+          <p className="whitespace-pre-line text-sm font-abel leading-relaxed text-dark-green/80">
             {doula.bio}
           </p>
         </section>
@@ -151,18 +178,18 @@ export default async function DoulaProfilePage({ params }: PageProps) {
         doula.clients_supported
       ) && (
         <section>
-          <h2 className="mb-5 text-lg font-semibold text-foreground">Practice details</h2>
+          <h2 className="mb-5 font-arinoe text-2xl text-dark-green">Practice details</h2>
 
-          {/* Badge groups first */}
-          <div className="mb-6 space-y-4">
+          {/* Badge groups */}
+          <div className="mb-6 space-y-5">
             {(doula.support_types?.length ?? 0) > 0 && (
               <div>
-                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                <p className="mb-2 text-xs font-abel font-medium uppercase tracking-wide text-muted-foreground">
                   Support type
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {doula.support_types!.map((t: string) => (
-                    <Badge key={t} label={t} variant="primary" />
+                    <SupportBadge key={t} label={t} />
                   ))}
                 </div>
               </div>
@@ -170,12 +197,12 @@ export default async function DoulaProfilePage({ params }: PageProps) {
 
             {(doula.birth_settings?.length ?? 0) > 0 && (
               <div>
-                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                <p className="mb-2 text-xs font-abel font-medium uppercase tracking-wide text-muted-foreground">
                   Birth settings
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {doula.birth_settings!.map((s: string) => (
-                    <Badge key={s} label={s} variant="muted" />
+                    <BirthSettingBadge key={s} label={s} />
                   ))}
                 </div>
               </div>
@@ -183,12 +210,38 @@ export default async function DoulaProfilePage({ params }: PageProps) {
 
             {(doula.specialisms?.length ?? 0) > 0 && (
               <div>
-                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                <p className="mb-2 text-xs font-abel font-medium uppercase tracking-wide text-muted-foreground">
                   Specialisms
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {doula.specialisms!.map((s: string) => (
-                    <Badge key={s} label={s} variant="outline" />
+                    <SpecialismBadge key={s} label={s} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {(doula.training_body?.length ?? 0) > 0 && (
+              <div>
+                <p className="mb-2 text-xs font-abel font-medium uppercase tracking-wide text-muted-foreground">
+                  Training
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {doula.training_body!.map((t: string) => (
+                    <TrainingBadge key={t} label={t} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {(doula.languages?.length ?? 0) > 0 && (
+              <div>
+                <p className="mb-2 text-xs font-abel font-medium uppercase tracking-wide text-muted-foreground">
+                  Languages
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {doula.languages!.map((l: string) => (
+                    <LanguageBadge key={l} label={l} />
                   ))}
                 </div>
               </div>
@@ -196,12 +249,10 @@ export default async function DoulaProfilePage({ params }: PageProps) {
           </div>
 
           {/* Text rows */}
-          <dl className="space-y-3 border-t border-border pt-5">
-            <DetailRow label="Languages"         value={doula.languages} />
+          <dl className="space-y-3 border-t-2 border-dark-green/20 pt-5">
             <DetailRow label="Travel radius"     value={doula.travel_radius_km ? `${doula.travel_radius_km} km` : null} />
             <DetailRow label="Price range"       value={doula.price_range} />
             <DetailRow label="Availability"      value={doula.availability} />
-            <DetailRow label="Training"          value={doula.training_body} />
             <DetailRow label="Clients supported" value={doula.clients_supported} />
           </dl>
         </section>
