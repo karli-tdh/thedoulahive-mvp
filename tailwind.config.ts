@@ -43,7 +43,7 @@ const config: Config = {
         input:   "var(--input)",
         ring:    "var(--ring)",
         // Named brand colors for direct use in class names
-        "dark-green":   "#00594F",
+        "dark-green":   "#07403B",
         "cotton":       "#F9F4E0",
         "sunny-yellow": "#FFE404",
         "light-pink":   "#F693C1",

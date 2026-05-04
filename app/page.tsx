@@ -65,20 +65,22 @@ export default function Home() {
         {/* Left column (text) */}
         <div className="relative flex flex-col justify-center overflow-hidden bg-cotton px-8 py-16 lg:order-1 lg:w-1/2 lg:px-16 lg:py-20">
 
-          {/* Label */}
-          <p className="mb-4 font-abel text-xs font-bold uppercase tracking-[0.18em] text-dark-green">
-            The digital village for families &amp; doulas
+          {/* Eyebrow */}
+          <p className="mb-6 font-abel text-xs font-bold uppercase tracking-[0.18em] text-dark-green">
+            Find your doula
           </p>
 
-          {/* Heading */}
-          <h1 className="font-arinoe leading-none">
-            <span className="block text-[24px] text-dark-green lg:text-[48px]">
-              Find Your
-            </span>
-            <span className="block text-[56px] text-brand-orange lg:text-[96px]">
-              DOULA
-            </span>
-          </h1>
+          {/* Logo as hero statement */}
+          <div className="w-[280px] lg:w-[320px]">
+            <Image
+              src="/logos/DH_Primary_multi01.png"
+              alt="The Doula Hive"
+              width={340}
+              height={340}
+              className="w-full"
+              priority
+            />
+          </div>
 
           {/* Subheading */}
           <p className="mt-6 max-w-[420px] font-abel text-lg leading-relaxed text-dark-green/80">
@@ -101,8 +103,8 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Honeycomb shape02 — bottom-left, absolute, full colour — hidden on mobile */}
-          <div className="pointer-events-none absolute bottom-0 left-0 hidden w-[220px] select-none lg:block">
+          {/* Honeycomb shape02 — top-left, absolute, full colour — hidden on mobile */}
+          <div className="pointer-events-none absolute left-0 top-0 hidden w-[440px] select-none lg:block">
             <Image
               src="/shapes/honeycombe_shape02_yellow.png"
               alt=""
@@ -142,7 +144,7 @@ export default function Home() {
           <div className="grid items-center gap-12 lg:grid-cols-2">
 
             {/* Left: image */}
-            <div className="w-full overflow-hidden rounded-xl border-[2.5px] border-dark-green">
+            <div className="w-full overflow-hidden rounded-xl">
               <Image
                 src="/images/Family-with-baby.png"
                 alt="Family with baby"
