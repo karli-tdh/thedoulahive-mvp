@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 interface Props {
-  role: 'doula' | 'family'
+  role: 'doula' | 'family' | null
 }
 
 export function NavBarClient({ role }: Props) {
@@ -23,7 +23,7 @@ export function NavBarClient({ role }: Props) {
     <header className="sticky top-0 z-40 bg-dark-green">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-6 px-4 sm:px-6">
 
-        {/* Logo */}
+        {/* Logo — always visible */}
         <Link href="/" className="shrink-0 hover:opacity-85 transition-opacity">
           <Image
             src="/logos/DH_Primary_creamltblue.png"
@@ -35,49 +35,76 @@ export function NavBarClient({ role }: Props) {
           />
         </Link>
 
-        {/* Nav links — Abel, cotton colour */}
-        <nav className="flex items-center gap-1 sm:gap-2 font-abel">
-          {role === 'family' ? (
+        {/* Nav links */}
+        <nav className="flex items-center gap-1 font-abel sm:gap-2">
+
+          {role === null && (
+            /* Logged-out: public links only */
             <>
               <Link
                 href="/doulas"
-                className="rounded-lg px-3 py-1.5 text-sm text-cotton/80 hover:text-cotton hover:bg-white/10 transition-colors"
+                className="rounded-lg px-3 py-1.5 text-sm text-cotton/80 hover:bg-white/10 hover:text-cotton transition-colors"
+              >
+                Find a doula
+              </Link>
+              <Link
+                href="/signup"
+                className="rounded-lg px-3 py-1.5 text-sm text-cotton/80 hover:bg-white/10 hover:text-cotton transition-colors"
+              >
+                Join as a doula
+              </Link>
+            </>
+          )}
+
+          {role === 'family' && (
+            <>
+              <Link
+                href="/doulas"
+                className="rounded-lg px-3 py-1.5 text-sm text-cotton/80 hover:bg-white/10 hover:text-cotton transition-colors"
               >
                 Browse
               </Link>
               <Link
                 href="/dashboard"
-                className="rounded-lg px-3 py-1.5 text-sm text-cotton/80 hover:text-cotton hover:bg-white/10 transition-colors"
+                className="rounded-lg px-3 py-1.5 text-sm text-cotton/80 hover:bg-white/10 hover:text-cotton transition-colors"
               >
                 My connections
               </Link>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="ml-1 rounded-lg px-3 py-1.5 text-sm text-cotton/70 hover:bg-white/10 hover:text-cotton transition-colors"
+              >
+                Log out
+              </button>
             </>
-          ) : (
+          )}
+
+          {role === 'doula' && (
             <>
               <Link
                 href="/onboarding/doula"
-                className="rounded-lg px-3 py-1.5 text-sm text-cotton/80 hover:text-cotton hover:bg-white/10 transition-colors"
+                className="rounded-lg px-3 py-1.5 text-sm text-cotton/80 hover:bg-white/10 hover:text-cotton transition-colors"
               >
                 My profile
               </Link>
               <Link
                 href="/dashboard"
-                className="rounded-lg px-3 py-1.5 text-sm text-cotton/80 hover:text-cotton hover:bg-white/10 transition-colors"
+                className="rounded-lg px-3 py-1.5 text-sm text-cotton/80 hover:bg-white/10 hover:text-cotton transition-colors"
               >
                 Dashboard
               </Link>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="ml-1 rounded-lg px-3 py-1.5 text-sm text-cotton/70 hover:bg-white/10 hover:text-cotton transition-colors"
+              >
+                Log out
+              </button>
             </>
           )}
 
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="ml-1 rounded-lg px-3 py-1.5 text-sm text-cotton/70 hover:text-cotton hover:bg-white/10 transition-colors"
-          >
-            Log out
-          </button>
         </nav>
-
       </div>
     </header>
   )

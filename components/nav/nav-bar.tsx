@@ -3,8 +3,8 @@ import { NavBarClient } from './nav-bar-client'
 
 /**
  * Server component — fetches the current user's role on every request.
- * Renders nothing if the user is not logged in (login/signup pages stay clean).
- * Passes role to NavBarClient which handles links and the logout action.
+ * Always renders (logged-out users see the public nav).
+ * Passes role (or null) to NavBarClient.
  */
 export async function NavBar() {
   const supabase = await createClient()
@@ -13,7 +13,9 @@ export async function NavBar() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) return null
+  if (!user) {
+    return <NavBarClient role={null} />
+  }
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -21,7 +23,5 @@ export async function NavBar() {
     .eq('id', user.id)
     .maybeSingle()
 
-  if (!profile?.role) return null
-
-  return <NavBarClient role={profile.role as 'doula' | 'family'} />
+  return <NavBarClient role={(profile?.role as 'doula' | 'family') ?? null} />
 }
