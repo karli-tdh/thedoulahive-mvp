@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { HandHeart, Flower } from '@phosphor-icons/react'
+import { HandHeart, Flower, CaretRight } from '@phosphor-icons/react'
 import { createClient } from '@/lib/supabase/client'
 import { redirectByRole } from '@/lib/auth/redirect-by-role'
 import { Button } from '@/components/ui/button'
@@ -73,34 +73,48 @@ export default function SignupPage() {
         <button
           type="button"
           onClick={() => setRole('doula')}
-          className={`flex flex-col items-center justify-center gap-3 rounded-2xl px-4 py-8 font-abel font-bold text-base transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-dark-green focus-visible:ring-offset-2
+          className={`group flex flex-col items-center justify-center gap-3 rounded-2xl px-4 py-14 font-abel font-bold text-base transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-dark-green focus-visible:ring-offset-2
             bg-dark-green text-cotton
             ${role === 'doula'
               ? 'ring-2 ring-dark-green ring-offset-2 opacity-100'
               : role !== null
                 ? 'opacity-50'
-                : 'opacity-100 hover:opacity-90'
+                : 'opacity-100 hover:bg-[#0a5249]'
             }`}
         >
-          <HandHeart size={36} weight="regular" />
-          I&apos;m a doula
+          <HandHeart size={36} weight="duotone" />
+          <span className="flex items-center gap-1">
+            I&apos;m a doula
+            <CaretRight
+              size={16}
+              weight="bold"
+              className="opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0"
+            />
+          </span>
         </button>
 
         {/* Family tile */}
         <button
           type="button"
           onClick={() => setRole('family')}
-          className={`flex flex-col items-center justify-center gap-3 rounded-2xl px-4 py-8 font-abel font-bold text-base transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-dark-green focus-visible:ring-offset-2
+          className={`group flex flex-col items-center justify-center gap-3 rounded-2xl px-4 py-14 font-abel font-bold text-base transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-dark-green focus-visible:ring-offset-2
             bg-light-pink text-dark-green
             ${role === 'family'
               ? 'ring-2 ring-dark-green ring-offset-2 opacity-100'
               : role !== null
                 ? 'opacity-50'
-                : 'opacity-100 hover:opacity-90'
+                : 'opacity-100 hover:bg-[#f8a5ce]'
             }`}
         >
-          <Flower size={36} weight="regular" />
-          Find a doula
+          <Flower size={36} weight="duotone" />
+          <span className="flex items-center gap-1">
+            I&apos;m looking for a doula
+            <CaretRight
+              size={16}
+              weight="bold"
+              className="opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0"
+            />
+          </span>
         </button>
 
       </div>
