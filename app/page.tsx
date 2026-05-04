@@ -31,7 +31,7 @@ const STEPS = [
 function HexBadge({ n }: { n: number }) {
   return (
     <div
-      className="flex h-11 w-11 shrink-0 items-center justify-center bg-dark-green font-arinoe text-xl text-cotton"
+      className="flex h-11 w-11 shrink-0 items-center justify-center bg-dark-green font-arinoe text-xl text-light-pink"
       style={{ clipPath: 'polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%)' }}
       aria-hidden
     >
@@ -51,7 +51,7 @@ export default function Home() {
       <section className="flex flex-col lg:flex-row lg:min-h-screen">
 
         {/* Right column (image) — first in DOM so it appears on top on mobile */}
-        <div className="relative h-[300px] bg-light-pink lg:order-2 lg:h-auto lg:w-1/2 overflow-hidden">
+        <div className="relative h-[280px] bg-light-pink lg:order-2 lg:h-auto lg:w-1/2 overflow-hidden">
           <Image
             src="/images/pregnant-mum-smile.png"
             alt="Smiling pregnant woman"
@@ -72,10 +72,10 @@ export default function Home() {
 
           {/* Heading */}
           <h1 className="font-arinoe leading-none">
-            <span className="block text-[48px] text-dark-green lg:text-[64px]">
+            <span className="block text-[24px] text-dark-green lg:text-[48px]">
               Find Your
             </span>
-            <span className="block text-[48px] text-brand-orange lg:text-[64px]">
+            <span className="block text-[56px] text-brand-orange lg:text-[96px]">
               DOULA
             </span>
           </h1>
@@ -86,23 +86,23 @@ export default function Home() {
           </p>
 
           {/* Buttons */}
-          <div className="mt-8 flex flex-wrap items-center gap-3">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <Link
               href="/doulas"
-              className="inline-flex items-center justify-center rounded-xl bg-dark-green px-7 py-3 font-abel text-base font-medium text-cotton transition-opacity duration-200 hover:opacity-85"
+              className="inline-flex items-center justify-center rounded-xl bg-dark-green px-7 py-3 font-abel text-base font-bold text-cotton transition-opacity duration-200 hover:opacity-85"
             >
               Find a doula
             </Link>
             <Link
               href="/signup"
-              className="inline-flex items-center justify-center rounded-xl border-2 border-dark-green bg-transparent px-7 py-3 font-abel text-base font-medium text-dark-green transition-all duration-200 hover:border-light-pink hover:bg-light-pink"
+              className="inline-flex items-center justify-center rounded-xl border-2 border-dark-green bg-transparent px-7 py-3 font-abel text-base font-bold text-dark-green transition-all duration-200 hover:border-light-pink hover:bg-light-pink"
             >
               Join as a doula
             </Link>
           </div>
 
-          {/* Honeycomb shape02 — bottom-left, absolute, full colour */}
-          <div className="pointer-events-none absolute bottom-0 left-0 w-[220px] select-none">
+          {/* Honeycomb shape02 — bottom-left, absolute, full colour — hidden on mobile */}
+          <div className="pointer-events-none absolute bottom-0 left-0 hidden w-[220px] select-none lg:block">
             <Image
               src="/shapes/honeycombe_shape02_yellow.png"
               alt=""
