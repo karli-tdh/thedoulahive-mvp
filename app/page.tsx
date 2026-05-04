@@ -148,8 +148,8 @@ export default function Home() {
           {/* Two-column grid */}
           <div className="grid items-center gap-12 lg:grid-cols-2">
 
-            {/* Left: image with honeycomb strip overlay */}
-            <div className="relative w-full overflow-hidden rounded-xl">
+            {/* Left: image */}
+            <div className="w-full overflow-hidden rounded-xl">
               <Image
                 src="/images/Family-with-baby.png"
                 alt="Family with baby"
@@ -158,24 +158,6 @@ export default function Home() {
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="w-full object-cover"
               />
-              {/* Honeycomb strip — rotated 90°, rises from bottom-left corner */}
-              <div
-                className="pointer-events-none absolute bottom-0 left-0 select-none opacity-85"
-                style={{
-                  transform: 'rotate(90deg)',
-                  transformOrigin: 'bottom left',
-                  maxWidth: '480px',
-                }}
-              >
-                <Image
-                  src="/shapes/honeycombe_strip_yellow.png"
-                  alt=""
-                  width={480}
-                  height={96}
-                  className="w-full"
-                  aria-hidden
-                />
-              </div>
             </div>
 
             {/* Right: steps */}
