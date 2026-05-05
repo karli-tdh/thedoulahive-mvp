@@ -9,7 +9,7 @@ export default function AuthLayout({
     <div className="flex min-h-screen flex-col items-center justify-center bg-cotton px-4 py-12">
 
       {/* Card area */}
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-[480px]">
 
         {/* Logo */}
         <div className="mb-8 flex justify-center">
