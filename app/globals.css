@@ -127,3 +127,16 @@ h1, h2, h3, h4, h5, h6 {
     text-wrap: balance;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Chrome autofill override — forces cotton bg + dark green text
+   across all form pages (login, signup, onboarding)
+═══════════════════════════════════════════════════════════════════ */
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #F9F4E0 inset;
+  box-shadow: 0 0 0px 1000px #F9F4E0 inset;
+  -webkit-text-fill-color: #07403B;
+}
