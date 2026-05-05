@@ -139,15 +139,15 @@ export function HowItWorks() {
           className={`grid items-center gap-10 transition-opacity duration-200 lg:grid-cols-2
             ${visible ? 'opacity-100' : 'opacity-0'}`}
         >
-          {/* Left: photo — fixed height so both images occupy the same space */}
-          <div className="h-80 w-full overflow-hidden rounded-xl lg:h-96">
+          {/* Left: photo — natural dimensions, no cropping */}
+          <div className="w-full overflow-hidden rounded-xl">
             <Image
               src={photo.src}
               alt={photo.alt}
               width={640}
               height={480}
               sizes="(max-width: 1024px) 100vw, 50vw"
-              className="h-full w-full object-cover object-top"
+              className="w-full h-auto"
             />
           </div>
 
