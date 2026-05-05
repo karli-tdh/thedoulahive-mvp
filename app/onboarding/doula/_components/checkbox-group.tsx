@@ -37,7 +37,7 @@ function CheckboxItem({
         }`}>
           {checked && (
             <svg viewBox="0 0 10 8" fill="none" className="h-2.5 w-2.5" aria-hidden>
-              <path d="M1 4l2.5 2.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M1 4l2.5 2.5L9 1" stroke="#07403B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           )}
         </div>

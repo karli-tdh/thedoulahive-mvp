@@ -83,19 +83,32 @@ export function Step2({ data, onChange }: Step2Props) {
         helper="Count all families you've supported — birth, postnatal, or both."
       >
         <div className="space-y-1">
-          {EXPERIENCE_OPTIONS.map((option) => (
-            <label key={option} className="flex cursor-pointer items-center gap-2.5 py-0.5">
-              <input
-                type="radio"
-                name="clients_supported"
-                value={option}
-                checked={data.clients_supported === option}
-                onChange={() => onChange('clients_supported', option)}
-                className="h-4 w-4 shrink-0 accent-brand-orange"
-              />
-              <span className="text-sm">{option}</span>
-            </label>
-          ))}
+          {EXPERIENCE_OPTIONS.map((option) => {
+            const selected = data.clients_supported === option
+            return (
+              <label key={option} className="flex cursor-pointer items-center gap-2.5 py-0.5">
+                <div className="relative h-4 w-4 shrink-0">
+                  <input
+                    type="radio"
+                    name="clients_supported"
+                    value={option}
+                    checked={selected}
+                    onChange={() => onChange('clients_supported', option)}
+                    className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                  />
+                  {/* Custom radio visual */}
+                  <div className={`flex h-4 w-4 items-center justify-center rounded-full border transition-colors duration-150 ${
+                    selected ? 'border-brand-orange bg-cotton' : 'border-border bg-cotton'
+                  }`}>
+                    {selected && (
+                      <div className="h-2 w-2 rounded-full bg-brand-orange" />
+                    )}
+                  </div>
+                </div>
+                <span className="text-sm">{option}</span>
+              </label>
+            )
+          })}
         </div>
       </FieldWrapper>
 

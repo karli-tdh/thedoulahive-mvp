@@ -67,21 +67,35 @@ export function Step1({ data, errors, onChange }: Step1Props) {
         required
       >
         <div className="space-y-2 pt-0.5">
-          {BIRTH_SETTINGS.map((option) => (
+          {BIRTH_SETTINGS.map((option) => {
+            const selected = data.birth_setting === option
+            return (
             <label
               key={option}
               className="flex cursor-pointer items-center gap-2.5 py-0.5"
             >
-              <input
-                type="radio"
-                name="birth_setting"
-                value={option}
-                checked={data.birth_setting === option}
-                onChange={() => onChange('birth_setting', option)}
-                className="h-4 w-4 shrink-0 accent-brand-orange"
-              />
+              <div className="relative h-4 w-4 shrink-0">
+                <input
+                  type="radio"
+                  name="birth_setting"
+                  value={option}
+                  checked={selected}
+                  onChange={() => onChange('birth_setting', option)}
+                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                />
+                {/* Custom radio visual */}
+                <div className={`flex h-4 w-4 items-center justify-center rounded-full border transition-colors duration-150 ${
+                  selected ? 'border-brand-orange bg-cotton' : 'border-border bg-cotton'
+                }`}>
+                  {selected && (
+                    <div className="h-2 w-2 rounded-full bg-brand-orange" />
+                  )}
+                </div>
+              </div>
               <span className="text-sm">{option}</span>
             </label>
+            )
+          })
           ))}
         </div>
       </Field>
