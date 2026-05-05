@@ -30,6 +30,10 @@ interface VideoUploaderProps {
   skipProfilePersist?: boolean
   /** Called when the user resets/cancels the uploader */
   onReset?: () => void
+  /** Override the idle-state heading (defaults to profile onboarding copy) */
+  heading?: string
+  /** Override the idle-state description (defaults to profile onboarding copy) */
+  description?: string
 }
 
 const MAX_POLL_ATTEMPTS = 40   // 40 × 3 s = 2 minutes
@@ -37,7 +41,7 @@ const POLL_INTERVAL_MS  = 3000
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-export function VideoUploader({ existingPlaybackId, onVideoReady, skipProfilePersist, onReset }: VideoUploaderProps) {
+export function VideoUploader({ existingPlaybackId, onVideoReady, skipProfilePersist, onReset, heading, description }: VideoUploaderProps) {
   const [state, setState] = useState<UploadState>({
     phase:      existingPlaybackId ? 'ready' : 'idle',
     progress:   0,
@@ -343,10 +347,10 @@ export function VideoUploader({ existingPlaybackId, onVideoReady, skipProfilePer
         </div>
 
         <p className="text-sm font-medium text-foreground">
-          30 to 90 seconds. Be yourself.
+          {heading ?? '30 to 90 seconds. Be yourself.'}
         </p>
         <p className="mt-1 text-sm text-muted-foreground">
-          This is how families will meet you before they message.
+          {description ?? 'This is how families will meet you before they message.'}
         </p>
 
         <div className="mt-5 flex flex-col items-center gap-2 sm:flex-row sm:justify-center sm:gap-3">

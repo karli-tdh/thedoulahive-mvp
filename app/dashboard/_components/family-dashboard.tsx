@@ -1,20 +1,16 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
-import { VideoPlayer } from '@/components/video/VideoPlayer'
+import { Baby, MagnifyingGlass, VideoCamera } from '@phosphor-icons/react'
 import { ConnectionsRealtime } from './connections-realtime'
 import type { FamilyDashboardData, FamilyConnection } from '../page'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function daysAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime()
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-  if (days === 0) return 'Today'
-  if (days === 1) return '1 day ago'
-  return `${days} days ago`
+function formatDueDate(dateStr: string | null): string | null {
+  if (!dateStr) return null
+  return new Date(dateStr).toLocaleString('en-GB', { month: 'long', year: 'numeric' })
 }
 
 function turnLabel(
@@ -28,83 +24,119 @@ function turnLabel(
   return { label: 'Your turn', yours: true }
 }
 
-// ── Pending card ──────────────────────────────────────────────────────────────
+function doulaFirstName(fullName: string | null): string {
+  if (!fullName) return 'your doula'
+  return fullName.trim().split(/\s+/)[0]
+}
 
-function PendingCard({ conn }: { conn: FamilyConnection }) {
-  return (
-    <div className="card-hover rounded-xl border-2 border-dark-green bg-card overflow-hidden">
+// ── Shared thumbnail block ────────────────────────────────────────────────────
 
-      {conn.doula_video_id && (
-        <div className="border-b-2 border-dark-green/30">
-          <VideoPlayer playbackId={conn.doula_video_id} />
-        </div>
-      )}
-
-      <div className="p-5 space-y-3">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="font-arinoe text-xl text-dark-green">{conn.doula_name ?? 'Doula'}</p>
-            {conn.doula_location && (
-              <p className="text-sm font-abel text-muted-foreground">{conn.doula_location}</p>
-            )}
-          </div>
-          <span className="shrink-0 rounded-full bg-soft-yellow/60 border border-soft-yellow px-2.5 py-1 text-xs font-abel font-medium text-dark-green">
-            Request sent
-          </span>
-        </div>
-
-        {conn.doula_tagline && (
-          <p className="text-sm font-abel text-dark-green/80 line-clamp-2">{conn.doula_tagline}</p>
-        )}
-
-        {conn.reaction_note && (
-          <blockquote className="border-l-4 border-light-pink pl-3 text-sm font-abel italic text-dark-green/70">
-            &ldquo;{conn.reaction_note}&rdquo;
-          </blockquote>
-        )}
-
-        <div className="flex items-center justify-between gap-2 pt-1">
-          <p className="text-xs font-abel text-muted-foreground">
-            Conversation requested · {daysAgo(conn.initiated_at)}
-          </p>
-          <Link
-            href={`/doulas/${conn.doula_profile_id}`}
-            className="text-xs font-abel text-dark-green/60 underline underline-offset-4 hover:text-dark-green"
-          >
-            View profile
-          </Link>
-        </div>
+function VideoThumbnail({ playbackId, alt }: { playbackId: string | null; alt: string }) {
+  if (playbackId) {
+    return (
+      <div className="relative h-[75px] w-[100px] shrink-0 overflow-hidden rounded-lg">
+        <Image
+          src={`https://image.mux.com/${playbackId}/thumbnail.jpg?time=0`}
+          alt={alt}
+          fill
+          className="object-cover"
+          sizes="100px"
+        />
       </div>
+    )
+  }
+  return (
+    <div className="flex h-[75px] w-[100px] shrink-0 items-center justify-center rounded-lg bg-cotton">
+      <VideoCamera size={24} weight="duotone" className="text-dark-green/30" aria-hidden />
     </div>
   )
 }
 
-// ── Active connection row ─────────────────────────────────────────────────────
+// ── Active conversation row ───────────────────────────────────────────────────
 
 function ActiveRow({ conn, userId }: { conn: FamilyConnection; userId: string }) {
   const turn = turnLabel(conn.last_message_sender_id, userId, conn.doula_name)
 
   return (
-    <div className="card-hover flex items-center justify-between gap-4 rounded-xl border-2 border-dark-green bg-card px-5 py-4">
-      <div className="min-w-0">
+    <div className="card-hover flex items-center gap-4 rounded-xl border-2 border-dark-green bg-cotton px-4 py-3">
+
+      <VideoThumbnail
+        playbackId={conn.doula_video_id}
+        alt={conn.doula_name ? `${conn.doula_name} intro video` : 'Doula intro video'}
+      />
+
+      <div className="min-w-0 flex-1">
         <p className="font-arinoe text-lg text-dark-green truncate">
           {conn.doula_name ?? 'Doula'}
         </p>
         <div className="mt-1 flex flex-wrap items-center gap-2">
           {conn.doula_location && (
-            <span className="text-xs font-abel text-muted-foreground">{conn.doula_location}</span>
+            <span className="rounded-full bg-dark-green px-2.5 py-0.5 text-xs font-abel font-medium text-cotton">
+              {conn.doula_location}
+            </span>
           )}
-          <span className={`text-xs font-abel font-medium ${turn.yours ? 'text-olive' : 'text-muted-foreground'}`}>
-            {turn.label}
-          </span>
+          {turn.yours ? (
+            <span className="rounded-full bg-brand-orange px-2.5 py-0.5 text-xs font-abel font-medium text-cotton">
+              {turn.label}
+            </span>
+          ) : (
+            <span className="rounded-full bg-olive px-2.5 py-0.5 text-xs font-abel font-medium text-cotton">
+              {turn.label}
+            </span>
+          )}
         </div>
       </div>
+
       <Link
         href={`/dashboard/${conn.id}`}
-        className="shrink-0 rounded-lg bg-dark-green px-3 py-1.5 text-xs font-abel font-medium text-cotton hover:opacity-80 transition-opacity"
+        className="shrink-0 rounded-full bg-dark-green px-4 py-1.5 text-xs font-abel font-medium text-cotton hover:opacity-80 transition-opacity"
       >
         Open conversation
       </Link>
+
+    </div>
+  )
+}
+
+// ── Pending conversation row ──────────────────────────────────────────────────
+
+function PendingRow({ conn }: { conn: FamilyConnection }) {
+  const firstName = doulaFirstName(conn.doula_name)
+
+  return (
+    <div className="card-hover flex items-center gap-4 rounded-xl border-2 border-dark-green bg-cotton px-4 py-3">
+
+      <VideoThumbnail
+        playbackId={conn.doula_video_id}
+        alt={conn.doula_name ? `${conn.doula_name} intro video` : 'Doula intro video'}
+      />
+
+      <div className="min-w-0 flex-1">
+        <p className="font-arinoe text-lg text-dark-green truncate">
+          {conn.doula_name ?? 'Doula'}
+        </p>
+        <div className="mt-1 flex flex-wrap items-center gap-2">
+          {conn.doula_location && (
+            <span className="rounded-full bg-dark-green px-2.5 py-0.5 text-xs font-abel font-medium text-cotton">
+              {conn.doula_location}
+            </span>
+          )}
+          <span
+            className="rounded-full px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green"
+            style={{ background: '#90EBD2' }}
+          >
+            Waiting for {firstName} to accept
+          </span>
+        </div>
+      </div>
+
+      <Link
+        href={`/doulas/${conn.doula_profile_id}`}
+        className="shrink-0 text-xs font-abel text-dark-green/60 underline underline-offset-4 hover:text-dark-green transition-colors"
+      >
+        View profile
+      </Link>
+
     </div>
   )
 }
@@ -113,14 +145,12 @@ function ActiveRow({ conn, userId }: { conn: FamilyConnection; userId: string })
 
 function DeclinedCard({ conn }: { conn: FamilyConnection }) {
   return (
-    <div className="rounded-xl border-2 border-dark-green/20 bg-muted/30 p-5 opacity-60">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="font-arinoe text-lg text-dark-green">{conn.doula_name ?? 'Doula'}</p>
-          {conn.doula_location && (
-            <p className="text-sm font-abel text-muted-foreground">{conn.doula_location}</p>
-          )}
-        </div>
+    <div className="rounded-xl border-2 border-dark-green/20 bg-cotton p-5 opacity-60">
+      <div>
+        <p className="font-arinoe text-lg text-dark-green">{conn.doula_name ?? 'Doula'}</p>
+        {conn.doula_location && (
+          <p className="text-sm font-abel text-muted-foreground">{conn.doula_location}</p>
+        )}
       </div>
       <p className="mt-3 text-sm font-abel text-muted-foreground">
         Not available — you can send a request to another doula anytime.
@@ -128,7 +158,7 @@ function DeclinedCard({ conn }: { conn: FamilyConnection }) {
       <div className="mt-4">
         <Link
           href="/doulas"
-          className="inline-flex items-center rounded-lg border-2 border-dark-green px-4 py-2 text-sm font-abel font-medium text-dark-green hover:bg-dark-green hover:text-cotton transition-colors"
+          className="inline-flex items-center rounded-full border-2 border-dark-green px-4 py-1.5 text-sm font-abel font-medium text-dark-green hover:bg-dark-green hover:text-cotton transition-colors"
         >
           Browse doulas
         </Link>
@@ -137,112 +167,176 @@ function DeclinedCard({ conn }: { conn: FamilyConnection }) {
   )
 }
 
+// ── Sidebar: Browse nudge card ────────────────────────────────────────────────
+
+function BrowseCard() {
+  return (
+    <div className="rounded-xl border-2 border-dark-green bg-cotton px-5 py-5 space-y-3">
+      <div className="flex items-center gap-2">
+        <MagnifyingGlass size={20} weight="duotone" className="shrink-0 text-olive" aria-hidden />
+        <h3 className="font-arinoe text-xl text-olive">Keep Browsing</h3>
+      </div>
+      <p className="text-sm font-abel text-dark-green/80 leading-relaxed">
+        The right doula is out there. Watch a few more videos and see who feels right.
+      </p>
+      <Link
+        href="/doulas"
+        className="inline-block rounded-full bg-dark-green px-5 py-2 text-sm font-abel font-bold text-cotton transition-colors hover:bg-olive hover:text-cotton"
+      >
+        Browse doulas →
+      </Link>
+    </div>
+  )
+}
+
+// ── Sidebar: Profile summary card ─────────────────────────────────────────────
+
+function ProfileCard({
+  dueDate,
+  birthSetting,
+}: {
+  dueDate:      string | null
+  birthSetting: string | null
+}) {
+  const formattedDue = formatDueDate(dueDate)
+
+  return (
+    <div className="rounded-xl border-2 border-dark-green bg-cotton px-5 py-5 space-y-4">
+      <div className="flex items-center gap-2">
+        <Baby size={24} weight="duotone" className="shrink-0 text-brand-orange" aria-hidden />
+        <h3 className="font-arinoe text-xl text-brand-orange">Your Profile</h3>
+      </div>
+      <div className="space-y-2">
+        {formattedDue && (
+          <div className="flex flex-col gap-0.5">
+            <span className="text-xs font-abel font-medium uppercase tracking-wide text-muted-foreground">
+              Due date
+            </span>
+            <span className="text-sm font-abel text-dark-green">{formattedDue}</span>
+          </div>
+        )}
+        {birthSetting && (
+          <div className="flex flex-col gap-0.5">
+            <span className="text-xs font-abel font-medium uppercase tracking-wide text-muted-foreground">
+              Birth setting
+            </span>
+            <span className="text-sm font-abel text-dark-green">{birthSetting}</span>
+          </div>
+        )}
+      </div>
+      <Link
+        href="/onboarding/family"
+        className="inline-block text-xs font-abel text-dark-green underline underline-offset-4 hover:text-brand-orange transition-colors"
+      >
+        Edit your profile →
+      </Link>
+    </div>
+  )
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+
+function EmptyConversations() {
+  return (
+    <div
+      className="rounded-xl px-6 py-10 text-center"
+      style={{ background: 'rgba(254, 112, 64, 0.10)' }}
+    >
+      <p className="text-sm font-abel font-medium text-dark-green/70">
+        No conversations yet — find a doula whose video speaks to you and send them a note.
+      </p>
+      <div className="mt-5">
+        <Link
+          href="/doulas"
+          className="inline-block rounded-full bg-dark-green px-5 py-2 text-sm font-abel font-bold text-cotton hover:opacity-80 transition-opacity"
+        >
+          Browse doulas →
+        </Link>
+      </div>
+    </div>
+  )
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function FamilyDashboard({ data, userId }: { data: FamilyDashboardData; userId: string }) {
-  const router = useRouter()
-  const pending  = data.connections.filter((c) => c.status === 'pending')
+export function FamilyDashboard({
+  data,
+  userId,
+}: {
+  data:   FamilyDashboardData
+  userId: string
+}) {
   const active   = data.connections.filter((c) => c.status === 'accepted')
+  const pending  = data.connections.filter((c) => c.status === 'pending')
   const declined = data.connections.filter((c) => c.status === 'declined')
 
-  async function handleLogout() {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push('/login')
-    router.refresh()
-  }
+  // All non-declined conversations, active first then pending
+  const conversations = [...active, ...pending]
 
-  // ── Empty state ─────────────────────────────────────────────────────────────
-  if (data.connections.length === 0) {
-    return (
-      <main className="mx-auto min-h-screen max-w-2xl px-4 py-10 sm:px-6">
-        <ConnectionsRealtime profileField="family_id" profileId={data.family_profile_id} />
-
-        <div className="space-y-6">
-          <div className="flex items-start justify-between gap-4">
-            <h1 className="font-arinoe text-4xl text-dark-green">Dashboard</h1>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="shrink-0 text-sm font-abel text-dark-green/60 underline underline-offset-4 hover:text-dark-green"
-            >
-              Log out
-            </button>
-          </div>
-
-          <div className="rounded-xl border-2 border-dashed border-dark-green/30 bg-muted/30 px-6 py-14 text-center">
-            <p className="text-base font-arinoe text-dark-green">No connections yet.</p>
-            <p className="mt-2 text-sm font-abel text-muted-foreground">
-              Browse doulas and send a connection request when you find a good fit.
-            </p>
-            <div className="mt-6">
-              <Link
-                href="/doulas"
-                className="inline-flex items-center rounded-lg bg-dark-green px-5 py-2.5 text-sm font-abel font-medium text-cotton hover:opacity-80 transition-opacity"
-              >
-                Browse doulas
-              </Link>
-            </div>
-          </div>
-        </div>
-      </main>
-    )
-  }
-
-  // ── Normal view ─────────────────────────────────────────────────────────────
   return (
-    <main className="mx-auto min-h-screen max-w-3xl px-4 py-10 sm:px-6">
+    <main className="mx-auto min-h-screen max-w-5xl px-4 py-10 sm:px-6">
       <ConnectionsRealtime profileField="family_id" profileId={data.family_profile_id} />
 
       <div className="space-y-8">
 
         {/* Header */}
-        <div className="flex items-start justify-between gap-4">
-          <h1 className="font-arinoe text-4xl text-dark-green">Dashboard</h1>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="shrink-0 text-sm font-abel text-dark-green/60 underline underline-offset-4 hover:text-dark-green"
-          >
-            Log out
-          </button>
+        <div>
+          <h1 className="font-arinoe text-4xl text-dark-green">
+            Welcome to your Dashboard{data.first_name ? `, ${data.first_name}` : ''}
+          </h1>
         </div>
 
-        {/* ── Active conversations ──────────────────────────────────────────── */}
-        {active.length > 0 && (
-          <section>
-            <h2 className="mb-4 font-arinoe text-2xl text-dark-green">Your conversations</h2>
-            <div className="space-y-3">
-              {active.map((conn) => (
-                <ActiveRow key={conn.id} conn={conn} userId={userId} />
-              ))}
-            </div>
-          </section>
-        )}
+        {/* ── Two-column grid ──────────────────────────────────────────────── */}
+        <div className="grid gap-8 lg:grid-cols-3">
 
-        {/* ── Pending ─────────────────────────────────────────────────────── */}
-        {pending.length > 0 && (
-          <section>
-            <h2 className="mb-4 font-arinoe text-2xl text-dark-green">Requests sent</h2>
-            <div className="grid gap-5 sm:grid-cols-2">
-              {pending.map((conn) => (
-                <PendingCard key={conn.id} conn={conn} />
-              ))}
-            </div>
-          </section>
-        )}
+          {/* ── Main column (2/3) ──────────────────────────────────────────── */}
+          <div className="space-y-8 lg:col-span-2">
 
-        {/* ── Declined ────────────────────────────────────────────────────── */}
-        {declined.length > 0 && (
-          <section>
-            <h2 className="mb-4 text-sm font-abel font-medium text-muted-foreground">Not available</h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {declined.map((conn) => (
-                <DeclinedCard key={conn.id} conn={conn} />
-              ))}
-            </div>
-          </section>
-        )}
+            {/* Active Conversations — shows accepted + pending, or empty state */}
+            <section>
+              <h2 className="mb-4 font-arinoe text-2xl text-brand-orange">
+                Active Conversations
+              </h2>
+              {conversations.length === 0 ? (
+                <EmptyConversations />
+              ) : (
+                <div className="space-y-3">
+                  {active.map((conn) => (
+                    <ActiveRow key={conn.id} conn={conn} userId={userId} />
+                  ))}
+                  {pending.map((conn) => (
+                    <PendingRow key={conn.id} conn={conn} />
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* Not available */}
+            {declined.length > 0 && (
+              <section>
+                <h2 className="mb-4 text-sm font-abel font-medium text-muted-foreground">
+                  Not available
+                </h2>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {declined.map((conn) => (
+                    <DeclinedCard key={conn.id} conn={conn} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+          </div>
+
+          {/* ── Sidebar (1/3) ──────────────────────────────────────────────── */}
+          <div className="space-y-5 lg:col-span-1">
+            <BrowseCard />
+            <ProfileCard
+              dueDate={data.due_date}
+              birthSetting={data.birth_setting}
+            />
+          </div>
+
+        </div>
 
       </div>
     </main>

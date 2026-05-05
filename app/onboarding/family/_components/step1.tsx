@@ -111,8 +111,7 @@ export function Step1({ data, errors, onChange }: Step1Props) {
               <span className="text-sm">{option}</span>
             </label>
             )
-          })
-          ))}
+          })}
         </div>
       </Field>
 

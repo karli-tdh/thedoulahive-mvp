@@ -113,13 +113,13 @@ h1, h2, h3, h4, h5, h6 {
 
   /* Turn banners */
   .banner-your-turn {
-    background-color: var(--sunny-yellow);
-    border: 2px solid var(--dark-green);
+    background-color: #FE7040;
+    border: 2px solid #FE7040;
     border-radius: 0.75rem;
   }
   .banner-waiting {
-    background-color: #ffffff;
-    border: 2px solid var(--dark-green);
+    background-color: var(--cotton);
+    border: 2px solid #FE7040;
     border-radius: 0.75rem;
   }
 

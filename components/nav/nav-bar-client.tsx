@@ -100,7 +100,7 @@ export function NavBarClient({ role, pendingCount }: Props) {
                 href="/dashboard"
                 className="rounded-full px-3 py-1.5 text-sm text-cotton/80 hover:bg-white/10 hover:text-cotton transition-colors"
               >
-                My connections
+                My conversations
               </Link>
               <button
                 type="button"

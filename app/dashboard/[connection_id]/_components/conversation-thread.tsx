@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
+import confetti from 'canvas-confetti'
 import Link from 'next/link'
+import { VideoCamera } from '@phosphor-icons/react'
 import { createClient } from '@/lib/supabase/client'
 import { VideoPlayer } from '@/components/video/VideoPlayer'
 import { VideoUploader } from '@/components/video/VideoUploader'
@@ -10,20 +11,26 @@ import type { ThreadData, ThreadMessage } from '../_types'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function initial(name: string | null | undefined): string {
-  return name?.trim().charAt(0).toUpperCase() ?? '?'
+function initials(name: string | null | undefined): string {
+  if (!name?.trim()) return '?'
+  const parts = name.trim().split(/\s+/)
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase()
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
 }
 
 function formatTimestamp(dateStr: string): string {
-  const date    = new Date(dateStr)
-  const now     = new Date()
-  const diffMs  = now.getTime() - date.getTime()
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-  const time    = date.toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit' })
+  const date = new Date(dateStr)
 
-  if (diffDays === 0) return time
-  if (diffDays < 7)  return `${date.toLocaleDateString('en-GB', { weekday: 'short' })} ${time}`
-  return `${date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} ${time}`
+  const day   = date.getDate()                                              // no leading zero
+  const month = date.toLocaleString('en-GB', { month: 'short' })           // Jan, Feb…
+  const year  = date.getFullYear()
+  const time  = date.toLocaleString('en-GB', {
+    hour:   'numeric',
+    minute: '2-digit',
+    hour12: true,
+  }).replace(/\s?(AM|PM)/, (_, p) => p.toLowerCase())                      // 9:27am
+
+  return `${day} ${month} ${year}, ${time}`
 }
 
 // ── Family context card (doula-only, pinned above messages) ──────────────────
@@ -37,10 +44,10 @@ function FamilyContextCard({
   if (!videoId && !reactionNote) return null
 
   return (
-    <div className="rounded-xl border-2 border-dark-green bg-card overflow-hidden">
+    <div className="rounded-xl border-2 border-dark-green bg-cotton overflow-hidden">
       {videoId && <VideoPlayer playbackId={videoId} />}
       <div className="px-4 py-3 space-y-1.5">
-        <p className="text-[10px] font-abel font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-xs font-abel font-medium text-dark-green/70">
           Why they reached out
         </p>
         {reactionNote ? (
@@ -74,8 +81,8 @@ function TextMessageCard({ msg }: { msg: ThreadMessage }) {
     <div
       className={`rounded-xl border-2 px-4 py-3 ${
         msg.is_mine
-          ? 'bg-light-blue/20 border-light-blue'
-          : 'bg-card border-dark-green/30'
+          ? 'border-[#90EBD2] bg-[#90EBD2] text-dark-green'
+          : 'border-dark-green bg-cotton text-dark-green'
       }`}
     >
       <p className="text-sm font-abel text-dark-green">{msg.body}</p>
@@ -95,6 +102,8 @@ function ContactShareCard({ msg, otherName }: { msg: ThreadMessage; otherName: s
   let contact: { phone?: string; email?: string; website?: string } = {}
   try { contact = JSON.parse(msg.body) } catch { return null }
 
+  const firstName = otherName?.trim().split(/\s+/)[0] ?? 'Your doula'
+
   if (msg.is_mine) {
     return (
       <div className="rounded-xl border-2 border-dark-green/20 bg-muted/40 px-4 py-3">
@@ -104,9 +113,12 @@ function ContactShareCard({ msg, otherName }: { msg: ThreadMessage; otherName: s
   }
 
   return (
-    <div className="rounded-xl border-2 border-dark-green bg-card p-5">
-      <p className="mb-3 font-arinoe text-xl text-dark-green">
-        Contact details from {otherName ?? 'your doula'}
+    <div className="rounded-xl border-2 border-dark-green bg-cotton p-5">
+      <p className="mb-1 font-arinoe text-xl text-dark-green">
+        {firstName} shared her contact info with you 🎉
+      </p>
+      <p className="mb-4 text-sm font-abel text-dark-green/70">
+        You&apos;ll contact her directly to move forward with your contract, payment, intake, etc.
       </p>
       <dl className="space-y-2">
         {contact.phone && (
@@ -144,46 +156,6 @@ function ContactShareCard({ msg, otherName }: { msg: ThreadMessage; otherName: s
   )
 }
 
-// ── Contact share modal ───────────────────────────────────────────────────────
-
-function ContactShareModal({
-  otherName, onConfirm, onCancel, sending,
-}: {
-  otherName: string | null
-  onConfirm: () => void
-  onCancel: () => void
-  sending: boolean
-}) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-near-black/50 p-4 sm:items-center">
-      <div className="w-full max-w-sm rounded-xl border-2 border-dark-green bg-card p-6 shadow-xl">
-        <h2 className="mb-2 font-arinoe text-2xl text-dark-green">Share your details?</h2>
-        <p className="mb-6 text-sm font-abel text-muted-foreground">
-          This will share your phone number, email, and website with{' '}
-          <span className="font-medium text-dark-green">{otherName ?? 'this family'}</span>.
-        </p>
-        <div className="flex gap-3">
-          <button
-            type="button"
-            disabled={sending}
-            onClick={onConfirm}
-            className="flex-1 rounded-lg bg-dark-green py-2.5 text-sm font-abel font-medium text-cotton hover:opacity-80 transition-opacity disabled:opacity-50"
-          >
-            {sending ? 'Sending…' : 'Yes, share'}
-          </button>
-          <button
-            type="button"
-            disabled={sending}
-            onClick={onCancel}
-            className="flex-1 rounded-lg border-2 border-dark-green py-2.5 text-sm font-abel font-medium text-dark-green hover:bg-muted transition-colors disabled:opacity-50"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 // ── Turn banner ───────────────────────────────────────────────────────────────
 
@@ -196,19 +168,19 @@ function TurnBanner({ isMyTurn, otherName, role }: {
 
   if (isMyTurn) {
     return (
-      <div className="banner-your-turn flex items-center gap-3 px-4 py-3">
-        <Image
-          src="/shapes/flag_ltpink.svg"
-          alt=""
-          width={20}
-          height={20}
-          className="h-5 w-5 shrink-0"
-          aria-hidden
-        />
-        <div>
-          <p className="text-sm font-abel font-semibold text-dark-green">Your turn</p>
-          <p className="text-xs font-abel text-dark-green/70">Send a message when you&apos;re ready.</p>
+      <div className="flex flex-col items-start gap-1.5 px-1 py-2">
+        {/* Flag ribbon with "YOUR TURN" overlaid */}
+        <div className="relative inline-flex h-11 w-48 items-center justify-center">
+          <svg viewBox="0 0 192 44" className="absolute inset-0 h-full w-full" aria-hidden>
+            <path fill="#FE7040" d="M0 0h175l17 22-17 22H0z" />
+          </svg>
+          <span className="relative font-arinoe text-sm tracking-wide text-cotton">
+            Your turn
+          </span>
         </div>
+        <p className="text-xs font-abel text-dark-green/70 pl-1">
+          Send a message when you&apos;re ready.
+        </p>
       </div>
     )
   }
@@ -250,11 +222,9 @@ export function ConversationThread({
   const [pendingVideoId, setPendingVideoId]   = useState<string | null>(null)
   const [sendingVideo, setSendingVideo]       = useState(false)
   const [videoSendError, setVideoSendError]   = useState(false)
-  const [showContactModal, setShowContactModal] = useState(false)
-  const [sendingContact, setSendingContact]   = useState(false)
+  const [contactShared, setContactShared]     = useState(false)
 
-  const messagesEndRef       = useRef<HTMLDivElement>(null)
-  const messagesContainerRef = useRef<HTMLDivElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // ── Turn logic ────────────────────────────────────────────────────────────
 
@@ -264,9 +234,7 @@ export function ConversationThread({
   // ── Scroll ────────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight
-    }
+    window.scrollTo(0, document.body.scrollHeight)
   }, [])
 
   useEffect(() => {
@@ -359,8 +327,15 @@ export function ConversationThread({
   // ── Send contact ──────────────────────────────────────────────────────────
 
   async function sendContact() {
-    if (!doula_contact || sendingContact) return
-    setSendingContact(true)
+    if (!doula_contact || contactShared) return
+
+    // Fire confetti immediately
+    confetti({
+      particleCount: 120,
+      spread: 80,
+      origin: { y: 0.7 },
+      colors: ['#FE7040', '#F55CB1', '#FFE404', '#90EBD2', '#F9F4E0'],
+    })
 
     const payload: Record<string, string> = {}
     if (doula_contact.phone)   payload.phone   = doula_contact.phone
@@ -375,28 +350,17 @@ export function ConversationThread({
       body:          JSON.stringify(payload),
     })
 
-    setShowContactModal(false)
-    setSendingContact(false)
+    setContactShared(true)
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
     <>
-      {showContactModal && (
-        <ContactShareModal
-          otherName={other_name}
-          onConfirm={sendContact}
-          onCancel={() => setShowContactModal(false)}
-          sending={sendingContact}
-        />
-      )}
-
-      {/* Full-viewport layout: pt-14 accounts for the sticky NavBar */}
-      <div className="flex flex-col" style={{ height: 'calc(100dvh - 3.5rem)' }}>
+      <div>
 
         {/* ── Thread header ──────────────────────────────────────────────── */}
-        <div className="shrink-0 border-b-2 border-dark-green/20 bg-cotton px-4 py-3">
+        <div className="border-b-2 border-dark-green/20 bg-cotton px-4 py-3">
           <div className="mx-auto flex max-w-2xl items-center gap-3">
 
             {/* Back */}
@@ -410,10 +374,22 @@ export function ConversationThread({
               </svg>
             </Link>
 
-            {/* Avatar */}
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-dark-green text-sm font-arinoe text-cotton">
-              {initial(other_name)}
-            </div>
+            {/* Avatar — popping-pink hexagon */}
+            <span className="relative inline-flex h-10 w-9 shrink-0 items-center justify-center">
+              <svg viewBox="0 0 980.68 1080" className="absolute inset-0 h-full w-full" aria-hidden>
+                <path
+                  fill="#F55CB1"
+                  d="M884.66,265.76L523.27,57.11c-23.22-13.41-51.83-13.41-75.06,0L86.82,265.76
+                     c-23.22,13.41-37.53,38.19-37.53,65v417.3c0,26.82,14.31,51.59,37.53,65
+                     l361.4,208.65c23.22,13.41,51.83,13.41,75.06,0l361.39-208.65
+                     c23.22-13.41,37.53-38.19,37.53-65v-417.3
+                     c0-26.81-14.31-51.59-37.53-65Z"
+                />
+              </svg>
+              <span className="relative text-[17px] font-arinoe leading-none tracking-tight text-cotton">
+                {initials(other_name)}
+              </span>
+            </span>
 
             {/* Name + location */}
             <div className="min-w-0">
@@ -428,7 +404,7 @@ export function ConversationThread({
         </div>
 
         {/* ── Messages ───────────────────────────────────────────────────── */}
-        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto bg-cotton">
+        <div className="bg-cotton">
           <div className="mx-auto max-w-2xl space-y-4 px-4 py-6">
 
             {/* Pinned context card — doula only */}
@@ -481,7 +457,7 @@ export function ConversationThread({
         </div>
 
         {/* ── Input area ─────────────────────────────────────────────────── */}
-        <div className="shrink-0 border-t-2 border-dark-green/20 bg-cotton">
+        <div className="border-t-2 border-dark-green/20 bg-cotton">
           <div className="mx-auto max-w-2xl space-y-3 px-4 py-4">
 
             {/* Turn banner */}
@@ -496,12 +472,10 @@ export function ConversationThread({
                   <button
                     type="button"
                     onClick={() => setShowUploader(true)}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-dark-green/40 bg-card px-4 py-3 text-sm font-abel font-medium text-dark-green/60 hover:border-dark-green hover:text-dark-green transition-colors"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-dark-green bg-cotton px-4 py-3 text-sm font-abel font-medium text-dark-green/70 hover:text-dark-green transition-colors"
                   >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
-                    </svg>
-                    Add a video
+                    <VideoCamera size={18} weight="duotone" className="shrink-0 text-dark-green" aria-hidden />
+                    Record or upload a video message
                   </button>
                 )}
 
@@ -511,6 +485,8 @@ export function ConversationThread({
                       skipProfilePersist
                       onVideoReady={(playbackId) => setPendingVideoId(playbackId)}
                       onReset={() => { setPendingVideoId(null); setShowUploader(false) }}
+                      heading="Send a video message"
+                      description="Keep it natural — a quick update, a hello, or an answer to their question. Up to 2 minutes."
                     />
                     <button
                       type="button"
@@ -574,7 +550,7 @@ export function ConversationThread({
                       }}
                       placeholder="Write a message…"
                       rows={3}
-                      className="w-full resize-none rounded-xl border-2 border-dark-green/40 bg-white px-3 py-2.5 text-sm font-abel text-dark-green placeholder:text-dark-green/40 focus:outline-none focus:border-dark-green"
+                      className="w-full resize-none rounded-xl border-2 border-dark-green/30 bg-cotton px-3 py-2.5 text-sm font-abel text-dark-green placeholder:text-dark-green/40 focus:outline-none focus:border-dark-green"
                     />
                     <div className="flex items-center justify-between gap-3">
                       <span className={`text-xs font-abel ${textInput.length > 280 ? 'text-destructive' : 'text-muted-foreground'}`}>
@@ -584,7 +560,7 @@ export function ConversationThread({
                         type="button"
                         disabled={!textInput.trim() || sendingText}
                         onClick={sendText}
-                        className="rounded-lg bg-dark-green px-4 py-2 text-sm font-abel font-medium text-cotton hover:opacity-80 transition-opacity disabled:opacity-50"
+                        className="rounded-full bg-dark-green px-4 py-2 text-sm font-abel font-medium text-cotton transition-colors hover:bg-popping-pink disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         {sendingText ? 'Sending…' : 'Send message'}
                       </button>
@@ -609,14 +585,30 @@ export function ConversationThread({
 
             {/* Share contact details — doula only */}
             {role === 'doula' && (
-              <div className="border-t-2 border-dark-green/15 pt-3">
-                <button
-                  type="button"
-                  onClick={() => setShowContactModal(true)}
-                  className="text-sm font-abel text-dark-green/60 underline underline-offset-4 hover:text-dark-green transition-colors"
-                >
-                  Share my details
-                </button>
+              <div className="border-t-2 border-dark-green/15 pt-4">
+                {contactShared ? (
+                  <div className="rounded-xl border-2 border-popping-pink bg-cotton p-5">
+                    <p className="font-arinoe text-xl text-dark-green">Contact info shared! 🎉</p>
+                    <p className="mt-1 text-sm font-abel text-dark-green/70">
+                      You&apos;ve shared your contact details with{' '}
+                      {other_name ?? 'this family'}. They&apos;ll be in touch soon — another client booked!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="rounded-xl bg-dark-green p-5">
+                    <p className="font-arinoe text-xl text-cotton">Ready to work with this family?</p>
+                    <p className="mt-1 mb-4 text-sm font-abel text-cotton/70">
+                      Click this button to share your contact info so this family can take the next step and get booked via your typical process.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={sendContact}
+                      className="rounded-full bg-cotton px-5 py-2.5 text-sm font-abel font-medium text-dark-green transition-colors hover:bg-popping-pink hover:text-cotton"
+                    >
+                      Share my info
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 

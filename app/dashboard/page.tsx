@@ -49,6 +49,9 @@ export interface DoulaDashboardData {
 export interface FamilyDashboardData {
   role:              'family'
   family_profile_id: string
+  first_name:        string
+  due_date:          string | null
+  birth_setting:     string | null
   connections:       FamilyConnection[]
 }
 
@@ -131,5 +134,29 @@ export default async function DashboardPage({
     )
   }
 
-  return <FamilyDashboard data={dash} userId={user.id} />
+  // Family: fetch first name + profile summary fields
+  const [{ data: familyProfileRow }, { data: familyUserRow }] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', user.id)
+      .maybeSingle(),
+    supabase
+      .from('family_profiles')
+      .select('due_date, birth_setting')
+      .eq('id', dash.family_profile_id)
+      .maybeSingle(),
+  ])
+
+  return (
+    <FamilyDashboard
+      data={{
+        ...dash,
+        first_name:    familyProfileRow?.full_name?.trim().split(' ')[0] ?? '',
+        due_date:      familyUserRow?.due_date      ?? null,
+        birth_setting: familyUserRow?.birth_setting ?? null,
+      }}
+      userId={user.id}
+    />
+  )
 }
