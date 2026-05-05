@@ -1,6 +1,6 @@
-import Image from ‘next/image’
-import Link from ‘next/link’
-import { HowItWorks } from ‘./_components/how-it-works’
+import Image from 'next/image'
+import Link from 'next/link'
+import { HowItWorks } from './_components/how-it-works'
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
