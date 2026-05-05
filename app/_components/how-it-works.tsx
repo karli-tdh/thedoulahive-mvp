@@ -88,23 +88,23 @@ export function HowItWorks() {
     : { src: '/images/doulas-standing.png',    alt: 'Doulas standing together' }
 
   return (
-    <section className="bg-cotton px-6 py-20">
+    <section className="bg-cotton px-6 py-12">
       <div className="mx-auto max-w-6xl">
 
         {/* Heading */}
-        <h2 className="mb-8 text-center font-arinoe text-[48px] text-dark-green">
+        <h2 className="mb-4 text-center font-arinoe text-[48px] text-dark-green">
           How it works
         </h2>
 
         {/* Persona toggle pills */}
-        <div className="mb-14 flex justify-center gap-3">
+        <div className="mb-8 flex justify-center gap-3">
           <button
             type="button"
             onClick={() => switchPersona('families')}
             className={`rounded-full px-6 py-2 font-abel text-sm font-bold transition-colors duration-200
               ${persona === 'families'
                 ? 'bg-dark-green text-cotton'
-                : 'border-2 border-dark-green bg-transparent text-dark-green hover:bg-dark-green/5'
+                : 'border-2 border-dark-green bg-transparent text-dark-green hover:bg-[#0a5249]/10'
               }`}
           >
             For Families
@@ -115,7 +115,7 @@ export function HowItWorks() {
             className={`rounded-full px-6 py-2 font-abel text-sm font-bold transition-colors duration-200
               ${persona === 'doulas'
                 ? 'bg-dark-green text-cotton'
-                : 'border-2 border-dark-green bg-transparent text-dark-green hover:bg-dark-green/5'
+                : 'border-2 border-dark-green bg-transparent text-dark-green hover:bg-[#0a5249]/10'
               }`}
           >
             For Doulas
@@ -124,18 +124,18 @@ export function HowItWorks() {
 
         {/* Two-column grid — fades on persona switch */}
         <div
-          className={`grid items-center gap-12 transition-opacity duration-200 lg:grid-cols-2
+          className={`grid items-center gap-10 transition-opacity duration-200 lg:grid-cols-2
             ${visible ? 'opacity-100' : 'opacity-0'}`}
         >
-          {/* Left: photo */}
-          <div className="w-full overflow-hidden rounded-xl">
+          {/* Left: photo — fixed height so both images occupy the same space */}
+          <div className="h-80 w-full overflow-hidden rounded-xl lg:h-96">
             <Image
               src={photo.src}
               alt={photo.alt}
               width={640}
               height={480}
               sizes="(max-width: 1024px) 100vw, 50vw"
-              className="w-full object-cover"
+              className="h-full w-full object-cover object-top"
             />
           </div>
 
