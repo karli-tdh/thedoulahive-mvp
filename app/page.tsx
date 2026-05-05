@@ -76,7 +76,7 @@ export default function Home() {
                 href="/signup"
                 className="inline-flex items-center justify-center rounded-xl border-2 border-dark-green bg-transparent px-7 py-3 font-abel text-base font-bold text-dark-green transition-all duration-200 hover:border-light-pink hover:bg-light-pink"
               >
-                Join as a doula
+                Get Started
               </Link>
             </div>
 
