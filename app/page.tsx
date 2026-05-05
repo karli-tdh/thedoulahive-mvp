@@ -1,44 +1,6 @@
-import Image from 'next/image'
-import Link from 'next/link'
-
-// ── How-it-works steps data ───────────────────────────────────────────────────
-
-const STEPS = [
-  {
-    num: 1,
-    title: 'Browse',
-    body: 'Watch intro videos from verified doulas. Filter by location, setting, and specialism.',
-  },
-  {
-    num: 2,
-    title: 'Connect',
-    body: "React to something specific on a doula’s profile. Your reaction note is the first thing they read.",
-  },
-  {
-    num: 3,
-    title: 'Talk',
-    body: 'Exchange async video messages at your own pace. No phone tag, no pressure.',
-  },
-  {
-    num: 4,
-    title: 'Find your doula',
-    body: 'When it feels right, share contact details and take the next step together.',
-  },
-]
-
-// ── Hexagon number badge ──────────────────────────────────────────────────────
-
-function HexBadge({ n }: { n: number }) {
-  return (
-    <div
-      className="flex h-11 w-11 shrink-0 items-center justify-center bg-dark-green font-arinoe text-xl text-light-pink"
-      style={{ clipPath: 'polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%)' }}
-      aria-hidden
-    >
-      {n}
-    </div>
-  )
-}
+import Image from ‘next/image’
+import Link from ‘next/link’
+import { HowItWorks } from ‘./_components/how-it-works’
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
@@ -137,48 +99,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════════════════
           SECTION 3  —  HOW IT WORKS
       ═══════════════════════════════════════════════════════════════════ */}
-      <section className="bg-cotton px-6 py-20">
-        <div className="mx-auto max-w-6xl">
-
-          {/* Heading */}
-          <h2 className="mb-14 text-center font-arinoe text-[48px] text-dark-green">
-            How it works
-          </h2>
-
-          {/* Two-column grid */}
-          <div className="grid items-center gap-12 lg:grid-cols-2">
-
-            {/* Left: image */}
-            <div className="w-full overflow-hidden rounded-xl">
-              <Image
-                src="/images/Family-with-baby.png"
-                alt="Family with baby"
-                width={640}
-                height={480}
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="w-full object-cover"
-              />
-            </div>
-
-            {/* Right: steps */}
-            <div className="space-y-8">
-              {STEPS.map((step) => (
-                <div key={step.num} className="flex items-start gap-5">
-                  <HexBadge n={step.num} />
-                  <div>
-                    <h3 className="font-abel text-lg font-bold text-dark-green">
-                      {step.title}
-                    </h3>
-                    <p className="mt-1 font-abel text-[15px] leading-relaxed text-dark-green/75">
-                      {step.body}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      <HowItWorks />
 
       {/* ═══════════════════════════════════════════════════════════════════
           SECTION 4  —  FOOTER
