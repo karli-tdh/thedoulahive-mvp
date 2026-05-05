@@ -44,6 +44,22 @@ export function Step1({ data, errors, onChange }: Step1Props) {
   return (
     <div className="space-y-8">
 
+      {/* Full name */}
+      <Field
+        label="Your name"
+        helper="This is how you'll appear to doulas — first and last name is great."
+        error={errors.full_name}
+        required
+      >
+        <Input
+          type="text"
+          value={data.full_name}
+          onChange={(e) => onChange('full_name', e.target.value)}
+          placeholder="e.g. Sarah Smith"
+          className="max-w-xs"
+        />
+      </Field>
+
       {/* Due date */}
       <Field
         label="Baby's due date"

@@ -37,11 +37,13 @@ export interface FamilyConnection extends DashboardConnection {
 }
 
 export interface DoulaDashboardData {
-  role:              'doula'
-  doula_profile_id:  string
-  is_published:      boolean
-  circle_verified:   boolean
-  connections:       DoulaConnection[]
+  role:               'doula'
+  doula_profile_id:   string
+  is_published:       boolean
+  circle_verified:    boolean
+  profile_views_week: number
+  first_name:         string
+  connections:        DoulaConnection[]
 }
 
 export interface FamilyDashboardData {
@@ -85,16 +87,44 @@ export default async function DashboardPage({
   }
 
   if (dash.role === 'doula') {
-    // Fetch circle_verified separately (not returned by the RPC)
-    const { data: doulaRow } = await supabase
-      .from('doula_profiles')
-      .select('circle_verified')
-      .eq('id', dash.doula_profile_id)
-      .maybeSingle()
+    // Fetch circle_verified + first name (not returned by the RPC)
+    const [{ data: doulaRow }, { data: profileRow }] = await Promise.all([
+      supabase
+        .from('doula_profiles')
+        .select('circle_verified')
+        .eq('id', dash.doula_profile_id)
+        .maybeSingle(),
+      supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .maybeSingle(),
+    ])
+
+    const firstName = profileRow?.full_name?.trim().split(' ')[0] ?? ''
+
+    // Profile views in the past 7 days
+    let profileViewsWeek = 0
+    try {
+      const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+      const { count } = await supabase
+        .from('profile_views')
+        .select('id', { count: 'exact', head: true })
+        .eq('doula_id', dash.doula_profile_id)
+        .gte('created_at', oneWeekAgo)
+      profileViewsWeek = count ?? 0
+    } catch {
+      profileViewsWeek = 0
+    }
 
     return (
       <DoulaDashboard
-        data={{ ...dash, circle_verified: doulaRow?.circle_verified ?? false }}
+        data={{
+          ...dash,
+          circle_verified:    doulaRow?.circle_verified ?? false,
+          profile_views_week: profileViewsWeek,
+          first_name:         firstName,
+        }}
         userId={user.id}
         saved={searchParams.saved === 'true'}
       />

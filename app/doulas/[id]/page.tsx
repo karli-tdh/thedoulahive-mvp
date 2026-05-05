@@ -100,6 +100,7 @@ export default async function DoulaProfilePage({ params }: PageProps) {
     .from('doula_profiles')
     .select(
       `id,
+       user_id,
        tagline,
        bio,
        support_types,
@@ -119,6 +120,15 @@ export default async function DoulaProfilePage({ params }: PageProps) {
     .single()
 
   if (!doula) notFound()
+
+  // Track profile view — authenticated, non-self viewers only
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user && user.id !== doula.user_id) {
+    await supabase
+      .from('profile_views')
+      .insert({ doula_id: doula.id, viewer_id: user.id })
+      .catch(() => {}) // silently ignore if table not yet migrated
+  }
 
   type ProfileShape = { full_name: string | null; location: string | null }
   const profile  = doula.profiles as unknown as ProfileShape | null

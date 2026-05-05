@@ -24,7 +24,10 @@
       "Bash(node -e \"const {default: Mux} = require\\('@mux/mux-node'\\); const c = new Mux\\({tokenId:'x',tokenSecret:'y'}\\); console.log\\(Object.keys\\(c.video\\)\\)\")",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(npx tsc *)",
+      "Bash(Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue)",
+      "Bash(node -e ' *)"
     ]
   }
 }

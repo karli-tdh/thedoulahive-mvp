@@ -35,19 +35,23 @@ export default function FamilyOnboardingPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
 
-      const { data: fp } = await supabase
-        .from('family_profiles').select('*').eq('user_id', user.id).maybeSingle()
+      const [{ data: fp }, { data: profileRow }] = await Promise.all([
+        supabase.from('family_profiles').select('*').eq('user_id', user.id).maybeSingle(),
+        supabase.from('profiles').select('full_name').eq('id', user.id).maybeSingle(),
+      ])
 
-      if (fp) {
-        setData({
+      setData((prev) => ({
+        ...prev,
+        full_name: nullToEmpty(profileRow?.full_name),
+        ...(fp ? {
           due_date:        nullToEmpty(fp.due_date),
           birth_setting:   nullToEmpty(fp.birth_setting),
           what_they_want:  nullToEmpty(fp.what_they_want),
           pregnancy_notes: nullToEmpty(fp.pregnancy_notes),
           intro_video_url: nullToEmpty(fp.intro_video_url),
           intro_video_id:  nullToEmpty(fp.intro_video_id),
-        })
-      }
+        } : {}),
+      }))
 
       setLoading(false)
     }
@@ -65,8 +69,9 @@ export default function FamilyOnboardingPage() {
 
   function validateStep1(): boolean {
     const next: FormErrors = {}
-    if (!data.due_date)             next.due_date       = 'Please add your due date.'
-    if (!data.birth_setting)        next.birth_setting  = 'Please choose a birth setting.'
+    if (!data.full_name.trim())      next.full_name      = 'Please add your name.'
+    if (!data.due_date)              next.due_date       = 'Please add your due date.'
+    if (!data.birth_setting)         next.birth_setting  = 'Please choose a birth setting.'
     if (!data.what_they_want.trim()) next.what_they_want = "Please tell us what you're looking for."
     setErrors(next)
     return Object.keys(next).length === 0
@@ -82,16 +87,22 @@ export default function FamilyOnboardingPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/login'); return }
 
-    const { error } = await supabase.from('family_profiles').upsert(
-      {
-        user_id:       user.id,
-        due_date:      data.due_date      || null,
-        birth_setting: data.birth_setting || null,
-        what_they_want: data.what_they_want.trim() || null,
-      },
-      { onConflict: 'user_id' }
-    )
+    const [fpResult, profileResult] = await Promise.all([
+      supabase.from('family_profiles').upsert(
+        {
+          user_id:        user.id,
+          due_date:       data.due_date       || null,
+          birth_setting:  data.birth_setting  || null,
+          what_they_want: data.what_they_want.trim() || null,
+        },
+        { onConflict: 'user_id' }
+      ),
+      supabase.from('profiles').update(
+        { full_name: data.full_name.trim() || null }
+      ).eq('id', user.id),
+    ])
 
+    const error = fpResult.error ?? profileResult.error
     if (error) { setSaveError(error.message); setSaving(false); return }
     setSaving(false); setStep(2)
     window.scrollTo({ top: 0, behavior: 'smooth' })

@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { Star, Users } from '@phosphor-icons/react'
 import { createClient } from '@/lib/supabase/client'
 import { VideoPlayer } from '@/components/video/VideoPlayer'
 import { ConnectionsRealtime } from './connections-realtime'
@@ -24,6 +25,17 @@ function formatDueDate(dateStr: string | null): string | null {
   return new Date(dateStr).toLocaleString('en-GB', { month: 'short', year: 'numeric' })
 }
 
+/**
+ * Takes a family's full_name ("Sarah Smith") and returns "Smith Family".
+ * Falls back to "A Family" if name is null or single-word.
+ */
+function familyDisplayName(fullName: string | null): string {
+  if (!fullName) return 'A Family'
+  const parts = fullName.trim().split(/\s+/)
+  if (parts.length < 2) return fullName
+  return `${parts[parts.length - 1]} Family`
+}
+
 function turnLabel(
   lastSenderId: string | null,
   currentUserId: string,
@@ -43,6 +55,7 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
   const [declining, setDeclining]    = useState(false)
   const [isPending, startTransition] = useTransition()
 
+  const displayName = familyDisplayName(conn.family_name)
   const dueDate     = formatDueDate(conn.due_date)
   const textPreview = conn.what_they_want?.slice(0, 160) ?? null
   const textFull    = conn.what_they_want ?? null
@@ -62,7 +75,7 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
   }
 
   return (
-    <article className="card-hover rounded-xl border-2 border-dark-green bg-card overflow-hidden">
+    <article className="card-hover rounded-xl border-2 border-dark-green bg-cotton overflow-hidden">
 
       {/* Family intro video */}
       {conn.family_video_id && (
@@ -75,9 +88,7 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
 
         {/* Header row */}
         <div className="flex items-start justify-between gap-3">
-          <p className="font-arinoe text-xl text-dark-green">
-            {conn.family_name ?? 'A family'}
-          </p>
+          <p className="font-arinoe text-xl text-dark-green">{displayName}</p>
           <span className="shrink-0 text-xs font-abel text-muted-foreground">
             {daysAgo(conn.initiated_at)}
           </span>
@@ -91,7 +102,7 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
             </span>
           )}
           {conn.birth_setting && (
-            <span className="rounded-full bg-light-blue/30 border border-light-blue px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green">
+            <span className="rounded-full bg-dark-green px-2.5 py-0.5 text-xs font-abel font-medium text-cotton">
               {conn.birth_setting}
             </span>
           )}
@@ -151,7 +162,7 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
                 type="button"
                 disabled={isPending}
                 onClick={() => respond('declined')}
-                className="rounded-lg bg-dark-green px-3 py-1.5 text-xs font-abel font-medium text-cotton hover:opacity-80 transition-opacity disabled:opacity-50"
+                className="rounded-full bg-dark-green px-4 py-1.5 text-xs font-abel font-medium text-cotton hover:opacity-80 transition-opacity disabled:opacity-50"
               >
                 {isPending ? 'Declining…' : 'Confirm'}
               </button>
@@ -169,7 +180,7 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
                 type="button"
                 disabled={isPending}
                 onClick={() => respond('accepted')}
-                className="rounded-lg bg-dark-green px-4 py-2 text-sm font-abel font-medium text-cotton hover:opacity-80 transition-opacity disabled:opacity-50"
+                className="rounded-full bg-dark-green px-5 py-2 text-sm font-abel font-medium text-cotton hover:opacity-80 transition-opacity disabled:opacity-50"
               >
                 {isPending ? 'Saving…' : 'Start conversation'}
               </button>
@@ -177,7 +188,7 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
                 type="button"
                 disabled={isPending}
                 onClick={() => setDeclining(true)}
-                className="rounded-lg border-2 border-dark-green px-4 py-2 text-sm font-abel font-medium text-dark-green hover:bg-light-pink/20 transition-colors disabled:opacity-50"
+                className="rounded-full border-2 border-dark-green px-5 py-2 text-sm font-abel font-medium text-dark-green hover:bg-light-pink/20 transition-colors disabled:opacity-50"
               >
                 Not available
               </button>
@@ -193,35 +204,120 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
 // ── Active connection row ─────────────────────────────────────────────────────
 
 function ActiveRow({ conn, userId }: { conn: DoulaConnection; userId: string }) {
-  const dueDate = formatDueDate(conn.due_date)
-  const turn    = turnLabel(conn.last_message_sender_id, userId, conn.family_name)
+  const displayName = familyDisplayName(conn.family_name)
+  const dueDate     = formatDueDate(conn.due_date)
+  const turn        = turnLabel(conn.last_message_sender_id, userId, conn.family_name)
 
   return (
-    <div className="card-hover flex items-center justify-between gap-4 rounded-xl border-2 border-dark-green bg-card px-5 py-4">
+    <div className="card-hover flex items-center justify-between gap-4 rounded-xl border-2 border-dark-green bg-cotton px-5 py-4">
       <div className="min-w-0">
-        <p className="font-arinoe text-lg text-dark-green truncate">
-          {conn.family_name ?? 'A family'}
-        </p>
+        <p className="font-arinoe text-lg text-dark-green truncate">{displayName}</p>
         <div className="mt-1 flex flex-wrap items-center gap-2">
           {dueDate && (
             <span className="text-xs font-abel text-muted-foreground">Due {dueDate}</span>
           )}
           {conn.birth_setting && (
-            <span className="rounded-full bg-light-blue/20 px-2 py-0.5 text-xs font-abel text-dark-green">
+            <span className="rounded-full bg-dark-green px-2.5 py-0.5 text-xs font-abel text-cotton">
               {conn.birth_setting}
             </span>
           )}
-          <span className={`text-xs font-abel font-medium ${turn.yours ? 'text-olive' : 'text-muted-foreground'}`}>
-            {turn.label}
-          </span>
+          {turn.yours ? (
+            <span className="rounded-full bg-brand-orange px-2.5 py-0.5 text-xs font-abel font-medium text-cotton">
+              {turn.label}
+            </span>
+          ) : (
+            <span className="text-xs font-abel text-muted-foreground">{turn.label}</span>
+          )}
         </div>
       </div>
       <Link
         href={`/dashboard/${conn.id}`}
-        className="shrink-0 rounded-lg bg-dark-green px-3 py-1.5 text-xs font-abel font-medium text-cotton hover:opacity-80 transition-opacity"
+        className="shrink-0 rounded-full bg-dark-green px-4 py-1.5 text-xs font-abel font-medium text-cotton hover:opacity-80 transition-opacity"
       >
         Open conversation
       </Link>
+    </div>
+  )
+}
+
+// ── Sidebar: Stats card ───────────────────────────────────────────────────────
+
+function StatsCard({
+  profileViewsWeek,
+  totalConnections,
+  doulaProfileId,
+}: {
+  profileViewsWeek: number
+  totalConnections: number
+  doulaProfileId:   string
+}) {
+  return (
+    <div className="rounded-xl border-2 border-dark-green bg-cotton px-5 py-5 space-y-4">
+      <div className="flex items-center gap-2">
+        <Star size={24} weight="duotone" className="shrink-0 text-dark-green" aria-hidden />
+        <h3 className="font-arinoe text-xl text-dark-green">Highlights</h3>
+      </div>
+      <div className="space-y-3">
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="text-sm font-abel text-dark-green/70">Profile views this week</span>
+          <span className="font-arinoe text-2xl text-dark-green">{profileViewsWeek}</span>
+        </div>
+        <div className="border-t border-dark-green/10 pt-3 flex items-baseline justify-between gap-2">
+          <span className="text-sm font-abel text-dark-green/70">Total connections</span>
+          <span className="font-arinoe text-2xl text-dark-green">{totalConnections}</span>
+        </div>
+      </div>
+      <Link
+        href={`/doulas/${doulaProfileId}`}
+        className="mt-1 inline-block text-xs font-abel text-dark-green underline underline-offset-4 hover:text-popping-pink transition-colors"
+      >
+        Preview your profile →
+      </Link>
+    </div>
+  )
+}
+
+// ── Sidebar: Circle Community card ───────────────────────────────────────────
+
+function CommunityCard() {
+  return (
+    <div className="rounded-xl border-2 border-dark-green bg-cotton px-5 py-5 space-y-3">
+      <div className="flex items-center gap-2">
+        <Users size={20} weight="duotone" className="shrink-0 text-dark-green" aria-hidden />
+        <h3 className="font-arinoe text-xl text-dark-green">The Hive</h3>
+      </div>
+      <p className="text-sm font-abel text-dark-green/80 leading-relaxed">
+        A space for doulas doing the work. Talk honestly about the realities of this work, stay
+        connected, and share feedback with Tif &amp; Karli who are building The Doula Hive!
+      </p>
+      <Link
+        href="https://thedoulahive.circle.so/c/doula-life/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-block rounded-full bg-dark-green px-5 py-2 text-sm font-abel font-bold text-cotton transition-colors hover:bg-popping-pink hover:text-cotton"
+      >
+        To The Hive
+      </Link>
+    </div>
+  )
+}
+
+// ── Empty state block ─────────────────────────────────────────────────────────
+
+function EmptyState({
+  children,
+  tint = 'olive',
+}: {
+  children: React.ReactNode
+  tint?: 'olive' | 'orange'
+}) {
+  const bg =
+    tint === 'orange'
+      ? 'rgba(254, 112, 64, 0.10)'   // brand-orange 10%
+      : 'rgba(149, 167, 51, 0.10)'   // olive 10%
+  return (
+    <div className="rounded-xl px-6 py-10 text-center" style={{ background: bg }}>
+      {children}
     </div>
   )
 }
@@ -241,7 +337,7 @@ export function DoulaDashboard({
   const active  = data.connections.filter((c) => c.status === 'accepted')
 
   return (
-    <main className="mx-auto min-h-screen max-w-3xl px-4 py-10 sm:px-6">
+    <main className="mx-auto min-h-screen max-w-5xl px-4 py-10 sm:px-6">
       <ConnectionsRealtime profileField="doula_id" profileId={data.doula_profile_id} />
 
       <div className="space-y-8">
@@ -257,56 +353,88 @@ export function DoulaDashboard({
 
         {/* Header */}
         <div>
-          <h1 className="font-arinoe text-4xl text-dark-green">Dashboard</h1>
+          <h1 className="font-arinoe text-4xl text-dark-green">
+            Welcome to your Dashboard{data.first_name ? `, ${data.first_name}` : ''}
+          </h1>
         </div>
 
-        {/* Go Live gate */}
+        {/* Go Live gate — full width */}
         <GoLiveGate
           doulaProfileId={data.doula_profile_id}
           circleVerified={data.circle_verified}
           isPublished={data.is_published}
         />
 
-        {/* ── Pending requests ─────────────────────────────────────────────── */}
-        <section>
-          <h2 className="mb-4 font-arinoe text-2xl text-dark-green flex items-center gap-2">
-            Connection requests
-            {pending.length > 0 && (
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-popping-pink text-[11px] font-abel font-bold text-white">
-                {pending.length}
-              </span>
-            )}
-          </h2>
+        {/* ── Two-column grid ──────────────────────────────────────────────── */}
+        <div className="grid gap-8 lg:grid-cols-3">
 
-          {pending.length === 0 ? (
-            <div className="rounded-xl border-2 border-dashed border-dark-green/30 bg-muted/30 px-6 py-10 text-center">
-              <p className="text-sm font-abel font-medium text-dark-green">No connection requests yet.</p>
-              {!data.is_published && (
-                <p className="mt-2 text-sm font-abel text-muted-foreground">
-                  You&apos;ll only appear in search once your profile is published.
-                </p>
+          {/* ── Main column (2/3) ──────────────────────────────────────────── */}
+          <div className="space-y-8 lg:col-span-2">
+
+            {/* Connection requests */}
+            <section>
+              <h2 className="mb-4 font-arinoe text-2xl text-olive flex items-center gap-2">
+                Connection requests
+                {pending.length > 0 && (
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-popping-pink text-[11px] font-abel font-bold text-white">
+                    {pending.length}
+                  </span>
+                )}
+              </h2>
+
+              {pending.length === 0 ? (
+                <EmptyState tint="olive">
+                  <p className="text-sm font-abel font-medium text-dark-green/60">
+                    No requests just yet.
+                  </p>
+                  {!data.is_published && (
+                    <p className="mt-2 text-sm font-abel text-muted-foreground">
+                      You&apos;ll only appear in search once your profile is published.
+                    </p>
+                  )}
+                </EmptyState>
+              ) : (
+                <div className="grid gap-5 sm:grid-cols-2">
+                  {pending.map((conn) => (
+                    <PendingCard key={conn.id} conn={conn} />
+                  ))}
+                </div>
               )}
-            </div>
-          ) : (
-            <div className="grid gap-5 sm:grid-cols-2">
-              {pending.map((conn) => (
-                <PendingCard key={conn.id} conn={conn} />
-              ))}
-            </div>
-          )}
-        </section>
+            </section>
 
-        {/* ── Active conversations ────────────────────────────────────────── */}
-        {active.length > 0 && (
-          <section>
-            <h2 className="mb-4 font-arinoe text-2xl text-dark-green">Active conversations</h2>
-            <div className="space-y-3">
-              {active.map((conn) => (
-                <ActiveRow key={conn.id} conn={conn} userId={userId} />
-              ))}
-            </div>
-          </section>
-        )}
+            {/* Active conversations */}
+            <section>
+              <h2 className="mb-4 font-arinoe text-2xl text-brand-orange">
+                Active conversations
+              </h2>
+              {active.length === 0 ? (
+                <EmptyState tint="orange">
+                  <p className="text-sm font-abel font-medium text-dark-green/60">
+                    No conversations yet — they&apos;ll appear here once you accept a connection request.
+                  </p>
+                </EmptyState>
+              ) : (
+                <div className="space-y-3">
+                  {active.map((conn) => (
+                    <ActiveRow key={conn.id} conn={conn} userId={userId} />
+                  ))}
+                </div>
+              )}
+            </section>
+
+          </div>
+
+          {/* ── Sidebar (1/3) ──────────────────────────────────────────────── */}
+          <div className="space-y-5 lg:col-span-1">
+            <StatsCard
+              profileViewsWeek={data.profile_views_week}
+              totalConnections={active.length}
+              doulaProfileId={data.doula_profile_id}
+            />
+            <CommunityCard />
+          </div>
+
+        </div>
 
       </div>
     </main>

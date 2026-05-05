@@ -1,4 +1,5 @@
 export interface FormData {
+  full_name:       string
   due_date:        string   // YYYY-MM-DD
   birth_setting:   string
   what_they_want:  string
@@ -10,6 +11,7 @@ export interface FormData {
 export type FormErrors = Partial<Record<keyof FormData, string>>
 
 export const INITIAL_FORM_DATA: FormData = {
+  full_name:       '',
   due_date:        '',
   birth_setting:   '',
   what_they_want:  '',
