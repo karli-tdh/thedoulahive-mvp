@@ -1,5 +1,4 @@
 import { FieldWrapper } from './field-wrapper'
-import { Toggle } from './toggle'
 import { VideoUploader } from '@/components/video/VideoUploader'
 import type { FormData, FormErrors } from '../types'
 
@@ -15,7 +14,7 @@ export function Step3({ data, onChange }: Step3Props) {
       {/* Intro video */}
       <FieldWrapper
         label="Intro video"
-        helper="Your video is how families meet you before they message. 30–90 seconds. Be yourself."
+        helper="Your video is how families meet you before they message. 30-90 seconds. Be yourself."
       >
         <VideoUploader
           existingPlaybackId={data.intro_video_id || null}
@@ -26,17 +25,10 @@ export function Step3({ data, onChange }: Step3Props) {
         />
       </FieldWrapper>
 
-      {/* Publish toggle */}
-      <FieldWrapper
-        label="Publish profile"
-        helper="You won't appear in search until you go live. Take your time."
-      >
-        <Toggle
-          checked={data.is_published}
-          onChange={(v) => onChange('is_published', v)}
-          label={data.is_published ? 'Profile is live' : 'Profile is hidden'}
-        />
-      </FieldWrapper>
+      {/* Go live is managed from the dashboard */}
+      <p className="text-sm font-abel text-muted-foreground">
+        Once your profile is saved, you can go live from your dashboard using your Circle access code.
+      </p>
     </div>
   )
 }
