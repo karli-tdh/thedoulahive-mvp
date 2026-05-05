@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { HandHeart, Flower, CaretRight } from '@phosphor-icons/react'
 import { createClient } from '@/lib/supabase/client'
-import { redirectByRole } from '@/lib/auth/redirect-by-role'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -52,7 +51,10 @@ export default function SignupPage() {
       })
     }
 
-    await redirectByRole(supabase, router)
+    // Redirect straight to onboarding — role is already known from the form,
+    // so there's no need to re-query the session (which may not exist yet if
+    // email confirmation is enabled in Supabase).
+    router.push(role === 'doula' ? '/onboarding/doula' : '/onboarding/family')
   }
 
   return (
