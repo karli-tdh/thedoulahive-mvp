@@ -6,7 +6,10 @@ import dynamic from 'next/dynamic'
 const MuxPlayer = dynamic(() => import('@mux/mux-player-react'), {
   ssr: false,
   loading: () => (
-    <div className="mx-auto w-full max-w-[320px] animate-pulse rounded-xl bg-muted" style={{ aspectRatio: '9/16' }} />
+    <div
+      className="mx-auto w-full max-w-[320px] animate-pulse rounded-xl bg-muted"
+      style={{ aspectRatio: '9/16' }}
+    />
   ),
 })
 
@@ -20,16 +23,19 @@ export function VideoPlayer({ playbackId, title }: VideoPlayerProps) {
   if (!playbackId) return null
 
   return (
-    <div className="flex justify-center w-full">
-      <div className="w-full max-w-[320px] overflow-hidden rounded-xl">
-        {title && (
-          <p className="mb-2 text-sm font-medium text-foreground">{title}</p>
-        )}
+    <div className="flex w-full justify-center">
+      {title && (
+        <p className="mb-2 text-sm font-medium text-foreground">{title}</p>
+      )}
+      {/* Container defines portrait shape; video fills it flush edge-to-edge */}
+      <div
+        className="w-full max-w-[320px] overflow-hidden rounded-xl"
+        style={{ aspectRatio: '9/16' }}
+      >
         <MuxPlayer
           playbackId={playbackId}
           streamType="on-demand"
           envKey={process.env.NEXT_PUBLIC_MUX_ENV_KEY}
-          style={{ width: '100%', aspectRatio: '9/16' }}
           accentColor="#000000"
         />
       </div>
