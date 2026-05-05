@@ -129,14 +129,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   Checkbox unchecked background — cotton instead of white
-═══════════════════════════════════════════════════════════════════ */
-
-input[type="checkbox"] {
-  background-color: var(--cotton);
-}
-
-/* ═══════════════════════════════════════════════════════════════════
    Chrome autofill override — forces cotton bg + dark green text
    across all form pages (login, signup, onboarding)
 ═══════════════════════════════════════════════════════════════════ */

@@ -21,12 +21,27 @@ function CheckboxItem({
 }) {
   return (
     <label className="flex cursor-pointer items-center gap-2.5 py-0.5">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={onToggle}
-        className="h-4 w-4 shrink-0 rounded border-border accent-brand-orange"
-      />
+      {/* Hidden native input keeps keyboard/form behaviour */}
+      <div className="relative h-4 w-4 shrink-0">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={onToggle}
+          className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+        />
+        {/* Custom visual */}
+        <div className={`flex h-4 w-4 items-center justify-center rounded border transition-colors duration-150 ${
+          checked
+            ? 'border-brand-orange bg-brand-orange'
+            : 'border-border bg-cotton'
+        }`}>
+          {checked && (
+            <svg viewBox="0 0 10 8" fill="none" className="h-2.5 w-2.5" aria-hidden>
+              <path d="M1 4l2.5 2.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          )}
+        </div>
+      </div>
       <span className="text-sm leading-snug">{option}</span>
     </label>
   )
