@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 
 // ── Data ──────────────────────────────────────────────────────────────────────
@@ -70,16 +70,28 @@ function HexBadge({ n }: { n: number }) {
 type Persona = 'families' | 'doulas'
 
 export function HowItWorks() {
-  const [persona,  setPersona]  = useState<Persona>('families')
-  const [visible,  setVisible]  = useState(true)
+  const [persona,        setPersona]        = useState<Persona>('families')
+  const [visible,        setVisible]        = useState(true)
+  const [nextPersona,    setNextPersona]    = useState<Persona | null>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  function switchPersona(next: Persona) {
-    if (next === persona) return
-    setVisible(false)
-    setTimeout(() => {
-      setPersona(next)
+  // When nextPersona is set, wait for the fade-out then swap content
+  useEffect(() => {
+    if (!nextPersona) return
+    timerRef.current = setTimeout(() => {
+      setPersona(nextPersona)
+      setNextPersona(null)
       setVisible(true)
     }, 180)
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [nextPersona])
+
+  function switchPersona(next: Persona) {
+    if (next === persona || nextPersona !== null) return
+    setVisible(false)
+    setNextPersona(next)
   }
 
   const steps = persona === 'families' ? FAMILY_STEPS : DOULA_STEPS
@@ -104,7 +116,7 @@ export function HowItWorks() {
             className={`rounded-full px-6 py-2 font-abel text-sm font-bold transition-colors duration-200
               ${persona === 'families'
                 ? 'bg-dark-green text-cotton'
-                : 'border-2 border-dark-green bg-transparent text-dark-green hover:bg-[#0a5249]/10'
+                : 'border-2 border-dark-green bg-transparent text-dark-green hover:bg-light-pink hover:border-light-pink'
               }`}
           >
             For Families
@@ -115,7 +127,7 @@ export function HowItWorks() {
             className={`rounded-full px-6 py-2 font-abel text-sm font-bold transition-colors duration-200
               ${persona === 'doulas'
                 ? 'bg-dark-green text-cotton'
-                : 'border-2 border-dark-green bg-transparent text-dark-green hover:bg-[#0a5249]/10'
+                : 'border-2 border-dark-green bg-transparent text-dark-green hover:bg-light-pink hover:border-light-pink'
               }`}
           >
             For Doulas
