@@ -111,7 +111,7 @@ export function NavBarClient({ role, pendingCount }: Props) {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="ml-1 rounded-full px-3 py-1.5 text-sm text-cotton/70 hover:bg-white/10 hover:text-cotton transition-colors"
+                className="ml-1 rounded-full px-3 py-1.5 text-sm text-cotton/80 transition-colors duration-200 hover:bg-sunny-yellow hover:text-dark-green"
               >
                 Log out
               </button>
@@ -136,7 +136,7 @@ export function NavBarClient({ role, pendingCount }: Props) {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="ml-1 rounded-full px-3 py-1.5 text-sm text-cotton/70 hover:bg-white/10 hover:text-cotton transition-colors"
+                className="ml-1 rounded-full px-3 py-1.5 text-sm text-cotton/80 transition-colors duration-200 hover:bg-sunny-yellow hover:text-dark-green"
               >
                 Log out
               </button>
