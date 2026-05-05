@@ -138,7 +138,7 @@ export function DolaGrid({ doulas, welcome = false }: { doulas: DoulaListItem[];
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
 
       {/* Welcome banner */}
       {showWelcome && (
@@ -168,7 +168,7 @@ export function DolaGrid({ doulas, welcome = false }: { doulas: DoulaListItem[];
       </div>
 
       {/* ── Filter bar ─────────────────────────────────────────────────────── */}
-      <div className="mb-8 rounded-xl border-2 border-dark-green bg-card p-4 sm:p-5">
+      <div className="mb-8 rounded-xl border-2 border-dark-green bg-cotton p-4 sm:p-5">
 
         {/* Mobile toggle */}
         <button
@@ -199,7 +199,7 @@ export function DolaGrid({ doulas, welcome = false }: { doulas: DoulaListItem[];
                 placeholder="e.g. London"
                 value={filters.location}
                 onChange={(e) => setFilters((f) => ({ ...f, location: e.target.value }))}
-                className="w-full rounded-lg border-2 border-dark-green/40 bg-white px-3 py-2 text-sm font-abel text-dark-green placeholder:text-dark-green/40 focus:outline-none focus:border-dark-green"
+                className="w-full rounded-lg border-2 border-dark-green/40 bg-cotton px-3 py-2 text-sm font-abel text-dark-green placeholder:text-dark-green/40 focus:outline-none focus:border-dark-green"
               />
             </div>
 
@@ -255,7 +255,7 @@ export function DolaGrid({ doulas, welcome = false }: { doulas: DoulaListItem[];
               </button>
 
               {specialismOpen && (
-                <div className="mt-1 max-h-48 overflow-y-auto rounded-lg border-2 border-dark-green/30 bg-white p-2">
+                <div className="mt-1 max-h-48 overflow-y-auto rounded-lg border-2 border-dark-green/30 bg-cotton p-2">
                   {SPECIALISM_OPTIONS.map((s) => (
                     <label
                       key={s}
@@ -303,7 +303,7 @@ export function DolaGrid({ doulas, welcome = false }: { doulas: DoulaListItem[];
           </button>
         </div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2">
           {filtered.map((doula) => (
             <DoulaCard key={doula.id} doula={doula} />
           ))}
