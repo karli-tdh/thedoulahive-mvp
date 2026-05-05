@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { redirectByRole } from '@/lib/auth/redirect-by-role'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -86,12 +85,16 @@ export default function LoginPage() {
         </CardContent>
 
         <CardFooter className="flex flex-col gap-4">
-          <Button type="submit" className="w-full font-abel" disabled={loading}>
-            {loading ? 'Logging in…' : 'Log in'}
-          </Button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-lg bg-dark-green px-4 py-2.5 font-abel font-bold text-cotton transition-colors duration-200 hover:bg-popping-pink hover:text-dark-green disabled:opacity-50"
+          >
+            {loading ? 'Logging in...' : 'Log in'}
+          </button>
           <p className="text-center text-sm font-abel text-muted-foreground">
             Don&apos;t have an account?{' '}
-            <Link href="/signup" className="underline underline-offset-4 hover:text-dark-green">
+            <Link href="/signup" className="underline underline-offset-4 transition-colors duration-200 hover:text-popping-pink">
               Sign up
             </Link>
           </p>
