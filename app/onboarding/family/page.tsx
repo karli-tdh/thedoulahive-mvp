@@ -147,7 +147,7 @@ export default function FamilyOnboardingPage() {
               <div
                 key={i}
                 className={`h-2 flex-1 rounded-full transition-all duration-300 ${
-                  i + 1 <= step ? 'bg-dark-green' : 'bg-muted'
+                  i + 1 <= step ? 'bg-brand-orange' : 'bg-muted'
                 }`}
               />
             ))}

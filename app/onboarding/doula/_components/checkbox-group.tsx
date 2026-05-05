@@ -25,7 +25,7 @@ function CheckboxItem({
         type="checkbox"
         checked={checked}
         onChange={onToggle}
-        className="h-4 w-4 shrink-0 rounded border-border accent-primary"
+        className="h-4 w-4 shrink-0 rounded border-border accent-brand-orange"
       />
       <span className="text-sm leading-snug">{option}</span>
     </label>

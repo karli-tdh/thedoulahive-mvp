@@ -78,7 +78,7 @@ export function Step1({ data, errors, onChange }: Step1Props) {
                 value={option}
                 checked={data.birth_setting === option}
                 onChange={() => onChange('birth_setting', option)}
-                className="h-4 w-4 shrink-0 accent-primary"
+                className="h-4 w-4 shrink-0 accent-brand-orange"
               />
               <span className="text-sm">{option}</span>
             </label>

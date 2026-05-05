@@ -91,7 +91,7 @@ export function Step2({ data, onChange }: Step2Props) {
                 value={option}
                 checked={data.clients_supported === option}
                 onChange={() => onChange('clients_supported', option)}
-                className="h-4 w-4 shrink-0 accent-primary"
+                className="h-4 w-4 shrink-0 accent-brand-orange"
               />
               <span className="text-sm">{option}</span>
             </label>
