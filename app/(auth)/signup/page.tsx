@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { HandHeart, Flower, CaretRight } from '@phosphor-icons/react'
 import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { Role } from '@/lib/types/database'
@@ -175,16 +174,16 @@ export default function SignupPage() {
       {/* Footer */}
       <div className="flex flex-col gap-4">
         {role && (
-          <Button
+          <button
             type="submit"
             form="signup-form"
-            className="w-full font-abel"
             disabled={loading}
+            className="w-full rounded-lg bg-dark-green px-4 py-2.5 font-abel font-bold text-cotton transition-colors duration-200 hover:bg-popping-pink hover:text-dark-green disabled:opacity-50"
           >
             {loading
-              ? 'Creating account…'
-              : `Continue as ${role === 'doula' ? 'a doula' : 'expecting family'}`}
-          </Button>
+              ? 'Creating account...'
+              : `Continue as ${role === 'doula' ? 'a doula' : 'a family'}`}
+          </button>
         )}
         <p className="text-center text-sm font-abel text-muted-foreground">
           Already have an account?{' '}
