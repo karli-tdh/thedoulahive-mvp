@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Star, Users } from '@phosphor-icons/react'
+import { CalendarBlank, MapPin, Star, Users } from '@phosphor-icons/react'
 import { createClient } from '@/lib/supabase/client'
 import { VideoPlayer } from '@/components/video/VideoPlayer'
 import { ConnectionsRealtime } from './connections-realtime'
@@ -97,12 +97,14 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
         {/* Pills */}
         <div className="flex flex-wrap gap-2">
           {dueDate && (
-            <span className="rounded-full bg-soft-yellow/60 border border-soft-yellow px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#90EBD2] px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green">
+              <CalendarBlank size={11} weight="duotone" aria-hidden />
               Due {dueDate}
             </span>
           )}
           {conn.birth_setting && (
-            <span className="rounded-full bg-dark-green px-2.5 py-0.5 text-xs font-abel font-medium text-cotton">
+            <span className="inline-flex items-center gap-1 rounded-full bg-dark-green px-2.5 py-0.5 text-xs font-abel font-medium text-cotton">
+              <MapPin size={11} weight="duotone" aria-hidden />
               {conn.birth_setting}
             </span>
           )}
@@ -180,7 +182,7 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
                 type="button"
                 disabled={isPending}
                 onClick={() => respond('accepted')}
-                className="rounded-full bg-dark-green px-5 py-2 text-sm font-abel font-medium text-cotton hover:opacity-80 transition-opacity disabled:opacity-50"
+                className="rounded-full bg-dark-green px-5 py-2 text-sm font-abel font-medium text-cotton transition-colors duration-200 hover:bg-popping-pink disabled:opacity-50"
               >
                 {isPending ? 'Saving…' : 'Start conversation'}
               </button>
@@ -188,7 +190,7 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
                 type="button"
                 disabled={isPending}
                 onClick={() => setDeclining(true)}
-                className="rounded-full border-2 border-dark-green px-5 py-2 text-sm font-abel font-medium text-dark-green hover:bg-light-pink/20 transition-colors disabled:opacity-50"
+                className="rounded-full border-2 border-dark-green px-5 py-2 text-sm font-abel font-medium text-dark-green transition-colors duration-200 hover:bg-dark-green hover:text-cotton disabled:opacity-50"
               >
                 Not available
               </button>
@@ -376,8 +378,20 @@ export function DoulaDashboard({
               <h2 className="mb-4 font-arinoe text-2xl text-olive flex items-center gap-2">
                 Connection requests
                 {pending.length > 0 && (
-                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-popping-pink text-[11px] font-abel font-bold text-white">
-                    {pending.length}
+                  <span className="relative inline-flex h-[22px] w-[20px] shrink-0 items-center justify-center">
+                    <svg viewBox="0 0 980.68 1080" className="absolute inset-0 h-full w-full" aria-hidden>
+                      <path
+                        fill="#F55CB1"
+                        d="M884.66,265.76L523.27,57.11c-23.22-13.41-51.83-13.41-75.06,0L86.82,265.76
+                           c-23.22,13.41-37.53,38.19-37.53,65v417.3c0,26.82,14.31,51.59,37.53,65
+                           l361.4,208.65c23.22,13.41,51.83,13.41,75.06,0l361.39-208.65
+                           c23.22-13.41,37.53-38.19,37.53-65v-417.3
+                           c0-26.81-14.31-51.59-37.53-65Z"
+                      />
+                    </svg>
+                    <span className="relative text-[10px] font-abel font-bold leading-none text-cotton">
+                      {pending.length > 9 ? '9+' : pending.length}
+                    </span>
                   </span>
                 )}
               </h2>

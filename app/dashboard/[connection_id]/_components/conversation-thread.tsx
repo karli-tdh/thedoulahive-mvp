@@ -64,7 +64,7 @@ function FamilyContextCard({
 
 function VideoMessageCard({ msg }: { msg: ThreadMessage }) {
   return (
-    <div className={`rounded-xl border-2 bg-card overflow-hidden ${msg.is_mine ? 'border-dark-green' : 'border-dark-green/30'}`}>
+    <div className={`rounded-xl border-2 bg-cotton overflow-hidden ${msg.is_mine ? 'border-dark-green' : 'border-dark-green/30'}`}>
       {msg.video_id && <VideoPlayer playbackId={msg.video_id} />}
       <div className="flex items-center justify-between gap-2 px-4 py-3">
         <span className="text-sm font-abel font-medium text-dark-green">
@@ -186,15 +186,11 @@ function TurnBanner({ isMyTurn, otherName, role }: {
   }
 
   return (
-    <div className="banner-waiting flex items-center gap-3 px-4 py-3">
-      <svg className="h-5 w-5 shrink-0 text-dark-green/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <circle cx="12" cy="12" r="10" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
-      </svg>
-      <div>
-        <p className="text-sm font-abel italic text-dark-green/70">Waiting on {waitingFor}</p>
-        <p className="text-xs font-abel text-muted-foreground">You&apos;ll see their reply here.</p>
-      </div>
+    <div className="flex items-center gap-3 px-1 py-2">
+      <span className="rounded-full bg-olive px-3 py-1.5 text-sm font-abel font-medium text-cotton">
+        Waiting on {waitingFor}
+      </span>
+      <p className="text-xs font-abel text-dark-green/60">You&apos;ll see their reply here.</p>
     </div>
   )
 }
@@ -222,14 +218,19 @@ export function ConversationThread({
   const [pendingVideoId, setPendingVideoId]   = useState<string | null>(null)
   const [sendingVideo, setSendingVideo]       = useState(false)
   const [videoSendError, setVideoSendError]   = useState(false)
-  const [contactShared, setContactShared]     = useState(false)
+  // True if a contact_share message sent by the doula already exists
+  const [contactShared, setContactShared] = useState(
+    () => initialData.messages.some((m) => m.message_type === 'contact_share' && m.is_mine)
+  )
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // ── Turn logic ────────────────────────────────────────────────────────────
 
-  const lastMsg  = messages.length > 0 ? messages[messages.length - 1] : null
-  const isMyTurn = lastMsg ? lastMsg.sender_id !== currentUserId : role === 'doula'
+  const lastMsg         = messages.length > 0 ? messages[messages.length - 1] : null
+  const isMyTurn        = lastMsg ? lastMsg.sender_id !== currentUserId : role === 'doula'
+  // Contact share card only appears once both sides have exchanged at least one message
+  const bothHaveMessaged = messages.some((m) => m.is_mine) && messages.some((m) => !m.is_mine)
 
   // ── Scroll ────────────────────────────────────────────────────────────────
 
@@ -288,17 +289,42 @@ export function ConversationThread({
     if (!body || body.length > 300 || sendingText) return
     setSendingText(true)
     setTextError(false)
+    setTextInput('') // clear immediately for snappiness
 
     const supabase = createClient()
-    const { error } = await supabase.from('messages').insert({
-      connection_id: connectionId,
-      sender_id:     currentUserId,
-      message_type:  'text',
-      body,
-    })
+    const { data: inserted, error } = await supabase
+      .from('messages')
+      .insert({
+        connection_id: connectionId,
+        sender_id:     currentUserId,
+        message_type:  'text',
+        body,
+      })
+      .select('id, created_at')
+      .single()
 
-    if (error) { setTextError(true); setSendingText(false); return }
-    setTextInput('')
+    if (error) {
+      setTextInput(body) // restore on failure
+      setTextError(true)
+      setSendingText(false)
+      return
+    }
+
+    // Add to state immediately — realtime will skip it (deduped by real DB id)
+    setMessages((prev) => [
+      ...prev,
+      {
+        id:           inserted.id,
+        sender_id:    currentUserId,
+        sender_name:  current_user_name,
+        message_type: 'text',
+        video_id:     null,
+        video_url:    null,
+        body,
+        created_at:   inserted.created_at,
+        is_mine:      true,
+      },
+    ])
     setSendingText(false)
   }
 
@@ -583,8 +609,8 @@ export function ConversationThread({
               </div>
             )}
 
-            {/* Share contact details — doula only */}
-            {role === 'doula' && (
+            {/* Share contact details — doula only, after both sides have messaged */}
+            {role === 'doula' && (contactShared || bothHaveMessaged) && (
               <div className="border-t-2 border-dark-green/15 pt-4">
                 {contactShared ? (
                   <div className="rounded-xl border-2 border-popping-pink bg-cotton p-5">
