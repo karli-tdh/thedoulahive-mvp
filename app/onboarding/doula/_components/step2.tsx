@@ -147,6 +147,31 @@ export function Step2({ data, onChange }: Step2Props) {
           selected={data.specialisms}
           onChange={(v) => onChange('specialisms', v)}
         />
+        <div className="mt-3 border-t border-border/40 pt-3">
+          <button
+            type="button"
+            onClick={() => onChange('specialisms', [])}
+            className={`flex items-center gap-2.5 text-sm transition-colors ${
+              data.specialisms.length === 0
+                ? 'font-medium text-dark-green'
+                : 'text-dark-green/50 hover:text-dark-green'
+            }`}
+          >
+            {/* Checkbox visual — checked when nothing selected */}
+            <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors duration-150 ${
+              data.specialisms.length === 0
+                ? 'border-brand-orange bg-brand-orange'
+                : 'border-border bg-cotton'
+            }`}>
+              {data.specialisms.length === 0 && (
+                <svg viewBox="0 0 10 8" fill="none" className="h-2.5 w-2.5" aria-hidden>
+                  <path d="M1 4l2.5 2.5L9 1" stroke="#07403B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              )}
+            </span>
+            None of these apply
+          </button>
+        </div>
       </FieldWrapper>
 
       {/* Support type */}
