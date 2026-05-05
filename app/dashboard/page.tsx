@@ -40,6 +40,7 @@ export interface DoulaDashboardData {
   role:              'doula'
   doula_profile_id:  string
   is_published:      boolean
+  circle_verified:   boolean
   connections:       DoulaConnection[]
 }
 
@@ -84,9 +85,16 @@ export default async function DashboardPage({
   }
 
   if (dash.role === 'doula') {
+    // Fetch circle_verified separately (not returned by the RPC)
+    const { data: doulaRow } = await supabase
+      .from('doula_profiles')
+      .select('circle_verified')
+      .eq('id', dash.doula_profile_id)
+      .maybeSingle()
+
     return (
       <DoulaDashboard
-        data={dash}
+        data={{ ...dash, circle_verified: doulaRow?.circle_verified ?? false }}
         userId={user.id}
         saved={searchParams.saved === 'true'}
       />

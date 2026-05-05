@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { VideoPlayer } from '@/components/video/VideoPlayer'
 import { ConnectionsRealtime } from './connections-realtime'
+import { GoLiveGate } from './go-live-gate'
 import type { DoulaDashboardData, DoulaConnection } from '../page'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -257,16 +258,14 @@ export function DoulaDashboard({
         {/* Header */}
         <div>
           <h1 className="font-arinoe text-4xl text-dark-green">Dashboard</h1>
-          {!data.is_published && (
-            <p className="mt-2 text-sm font-abel text-muted-foreground">
-              Your profile isn&apos;t published yet —{' '}
-              <Link href="/onboarding/doula" className="underline underline-offset-4 hover:text-dark-green">
-                complete your profile
-              </Link>{' '}
-              to appear in search.
-            </p>
-          )}
         </div>
+
+        {/* Go Live gate */}
+        <GoLiveGate
+          doulaProfileId={data.doula_profile_id}
+          circleVerified={data.circle_verified}
+          isPublished={data.is_published}
+        />
 
         {/* ── Pending requests ─────────────────────────────────────────────── */}
         <section>

@@ -38,8 +38,9 @@ export interface DoulaProfile {
   travel_radius_km: number | null
   price_range: string | null
   availability: string | null
-  is_published: boolean
-  created_at: string
+  is_published:     boolean
+  circle_verified:  boolean
+  created_at:       string
 }
 
 export interface FamilyProfile {
@@ -52,6 +53,13 @@ export interface FamilyProfile {
   intro_video_id: string | null
   what_they_want: string | null
   created_at: string
+}
+
+export interface AccessCode {
+  id:         string
+  code:       string
+  is_active:  boolean
+  expires_at: string
 }
 
 export interface Connection {
@@ -178,6 +186,12 @@ export interface Database {
         Row: Message
         Insert: MessageInsert
         Update: MessageUpdate
+        Relationships: []
+      }
+      access_codes: {
+        Row: AccessCode
+        Insert: Omit<AccessCode, 'id'>
+        Update: Partial<Omit<AccessCode, 'id'>>
         Relationships: []
       }
     }
