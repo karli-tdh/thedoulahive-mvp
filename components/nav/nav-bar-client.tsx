@@ -87,7 +87,7 @@ export function NavBarClient({ role, pendingCount }: Props) {
               </Link>
               <Link
                 href="/login"
-                className="rounded-full px-3 py-1.5 text-sm text-cotton transition-colors hover:text-[#F55CB1]"
+                className="rounded-full px-3 py-1.5 text-sm text-cotton/80 transition-colors duration-200 hover:bg-[#F55CB1] hover:text-cotton"
               >
                 Log in
               </Link>
