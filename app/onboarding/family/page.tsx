@@ -194,7 +194,7 @@ export default function FamilyOnboardingPage() {
             type="button"
             onClick={step === 1 ? saveStep1 : saveStep2}
             disabled={saving}
-            className="rounded-xl bg-dark-green px-6 py-2.5 text-sm font-abel font-medium text-cotton hover:opacity-80 transition-opacity disabled:opacity-40"
+            className="rounded-xl bg-dark-green px-6 py-2.5 text-sm font-abel font-medium text-cotton transition-colors duration-200 hover:bg-brand-orange disabled:opacity-40"
           >
             {saving
               ? 'Saving…'

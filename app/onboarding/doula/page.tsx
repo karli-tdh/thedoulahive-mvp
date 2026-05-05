@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
 import { Step1 } from './_components/step1'
 import { Step2 } from './_components/step2'
 import { Step3 } from './_components/step3'
@@ -219,31 +218,47 @@ export default function DoulaOnboardingPage() {
         {/* Navigation */}
         <div className="mt-10 flex items-center justify-between">
           {step > 1 ? (
-            <Button
-              variant="outline"
+            <button
+              type="button"
               onClick={() => { setStep((s) => s - 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
               disabled={saving}
+              className="rounded-xl border-2 border-dark-green px-5 py-2.5 text-sm font-abel font-medium text-dark-green transition-colors duration-200 hover:bg-dark-green hover:text-cotton disabled:opacity-50"
             >
               Back
-            </Button>
+            </button>
           ) : (
             <div />
           )}
 
           {step === 1 && (
-            <Button onClick={saveStep1} disabled={saving}>
-              {saving ? 'Saving…' : 'Save & continue'}
-            </Button>
+            <button
+              type="button"
+              onClick={saveStep1}
+              disabled={saving}
+              className="rounded-xl bg-dark-green px-6 py-2.5 text-sm font-abel font-medium text-cotton transition-colors duration-200 hover:bg-brand-orange disabled:opacity-50"
+            >
+              {saving ? 'Saving...' : 'Save & continue'}
+            </button>
           )}
           {step === 2 && (
-            <Button onClick={saveStep2} disabled={saving}>
-              {saving ? 'Saving…' : 'Save & continue'}
-            </Button>
+            <button
+              type="button"
+              onClick={saveStep2}
+              disabled={saving}
+              className="rounded-xl bg-dark-green px-6 py-2.5 text-sm font-abel font-medium text-cotton transition-colors duration-200 hover:bg-brand-orange disabled:opacity-50"
+            >
+              {saving ? 'Saving...' : 'Save & continue'}
+            </button>
           )}
           {step === 3 && (
-            <Button onClick={saveStep3} disabled={saving}>
-              {saving ? 'Saving…' : 'Save profile'}
-            </Button>
+            <button
+              type="button"
+              onClick={saveStep3}
+              disabled={saving}
+              className="rounded-xl bg-dark-green px-6 py-2.5 text-sm font-abel font-medium text-cotton transition-colors duration-200 hover:bg-brand-orange disabled:opacity-50"
+            >
+              {saving ? 'Saving...' : 'Save profile'}
+            </button>
           )}
         </div>
       </div>
