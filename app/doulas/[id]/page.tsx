@@ -209,10 +209,12 @@ export default async function DoulaProfilePage({ params }: PageProps) {
   return (
     <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
 
-      {/* ── Intro video ────────────────────────────────────────────────────── */}
+      {/* ── Intro video — snug portrait container, centred ─────────────────── */}
       {doula.intro_video_id && (
-        <div className="mb-10 overflow-hidden rounded-xl border-2 border-dark-green">
-          <VideoPlayer playbackId={doula.intro_video_id} />
+        <div className="mb-10 flex justify-center">
+          <div className="w-full max-w-[320px] overflow-hidden rounded-2xl border-2 border-dark-green shadow-[2px_2px_0px_#07403B]">
+            <VideoPlayer playbackId={doula.intro_video_id} />
+          </div>
         </div>
       )}
 
@@ -265,15 +267,13 @@ export default async function DoulaProfilePage({ params }: PageProps) {
         )}
       </div>
 
-      {/* ── 6. Connect button ──────────────────────────────────────────────── */}
-      <div className="mb-10">
-        <ConnectButton
-          doulaProfileId={doula.id}
-          doulaName={name}
-          returnPath={`/doulas/${doula.id}`}
-          alreadyConnected={alreadyConnected}
-        />
-      </div>
+      {/* ── ConnectButton — idle renders only sticky pill; form/done render inline ── */}
+      <ConnectButton
+        doulaProfileId={doula.id}
+        doulaName={name}
+        returnPath={`/doulas/${doula.id}`}
+        alreadyConnected={alreadyConnected}
+      />
 
       {/* ── About my work ──────────────────────────────────────────────────── */}
       {doula.bio && (

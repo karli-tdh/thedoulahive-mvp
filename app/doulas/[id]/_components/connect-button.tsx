@@ -79,7 +79,7 @@ export function ConnectButton({
 
   if (phase === 'done') {
     return (
-      <div className="rounded-xl border-2 border-dark-green bg-soft-yellow/40 p-6 text-center">
+      <div className="my-8 rounded-xl border-2 border-dark-green bg-soft-yellow/40 p-6 text-center">
         <p className="font-arinoe text-xl text-dark-green">Your request has been sent.</p>
         <p className="mt-1.5 text-sm font-abel text-muted-foreground">
           {doulaName} will be in touch soon.
@@ -90,7 +90,7 @@ export function ConnectButton({
 
   if (phase === 'form' || phase === 'submitting') {
     return (
-      <div className="rounded-xl border-2 border-dark-green bg-[#F9F4E0] p-6 space-y-4">
+      <div className="my-8 rounded-xl border-2 border-dark-green bg-[#F9F4E0] p-6 space-y-4">
         <div>
           <label className="block text-sm font-abel font-medium text-dark-green">
             What caught your attention?
@@ -132,26 +132,18 @@ export function ConnectButton({
     )
   }
 
-  // Idle — inline button + sticky pill
+  // Idle — sticky pill only (no inline button)
   return (
     <>
-      <div>
-        {error && <p className="mb-3 text-sm font-abel text-destructive">{error}</p>}
-        <button
-          type="button"
-          onClick={handleOpen}
-          className="w-full rounded-full bg-dark-green px-6 py-3 text-base font-abel font-medium text-cotton transition-colors duration-200 hover:bg-[#F55CB1] sm:w-auto"
-        >
-          Connect with {doulaName}
-        </button>
-      </div>
+      {/* Any role-check error shows inline */}
+      {error && <p className="mb-3 text-sm font-abel text-destructive">{error}</p>}
 
-      {/* Sticky pill — fixed to bottom of viewport */}
+      {/* Sticky pill — visible immediately, fixed to bottom of viewport */}
       <div className="pointer-events-none fixed bottom-6 left-0 right-0 z-40 flex justify-center">
         <button
           type="button"
           onClick={handleOpen}
-          className="pointer-events-auto rounded-full bg-dark-green px-8 py-3 font-abel text-base font-medium text-cotton shadow-[0_4px_16px_rgba(7,64,59,0.25)] transition-colors duration-200 hover:bg-[#F55CB1]"
+          className="pointer-events-auto rounded-full bg-dark-green px-10 py-3.5 font-abel text-base font-medium text-cotton shadow-[0_4px_20px_rgba(7,64,59,0.30)] transition-colors duration-200 hover:bg-[#F55CB1]"
         >
           Connect with {doulaName}
         </button>
