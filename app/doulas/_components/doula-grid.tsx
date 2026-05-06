@@ -102,13 +102,19 @@ function FilterLabel({ icon: Icon, children, iconClass = 'text-cotton' }: {
   )
 }
 
-// ── Olive checkbox (shared between Specialism + Language) ────────────────────
+// ── Checkbox (olive for Specialism, yellow for Language) ─────────────────────
 
-function OliveCheckbox({ checked, onChange, label }: {
+function OliveCheckbox({ checked, onChange, label, colorScheme = 'olive' }: {
   checked: boolean
   onChange: () => void
   label: string
+  colorScheme?: 'olive' | 'yellow'
 }) {
+  const checkedBox = colorScheme === 'yellow'
+    ? 'border-[#FFE404] bg-[#FFE404]'
+    : 'border-olive bg-olive'
+  const checkStroke = '#07403B' // dark green on both
+
   return (
     <label className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-white/10">
       <div className="relative h-4 w-4 shrink-0">
@@ -119,11 +125,11 @@ function OliveCheckbox({ checked, onChange, label }: {
           className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
         />
         <div className={`flex h-4 w-4 items-center justify-center rounded border transition-colors duration-150 ${
-          checked ? 'border-olive bg-olive' : 'border-cotton/40 bg-transparent'
+          checked ? checkedBox : 'border-cotton/40 bg-transparent'
         }`}>
           {checked && (
             <svg viewBox="0 0 10 8" fill="none" className="h-2.5 w-2.5" aria-hidden>
-              <path d="M1 4l2.5 2.5L9 1" stroke="#07403B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M1 4l2.5 2.5L9 1" stroke={checkStroke} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           )}
         </div>
@@ -357,6 +363,7 @@ export function DolaGrid({
                       <OliveCheckbox
                         key={l}
                         label={l}
+                        colorScheme="yellow"
                         checked={filters.languages.includes(l)}
                         onChange={() => setFilters((f) => ({ ...f, languages: toggle(f.languages, l) }))}
                       />
