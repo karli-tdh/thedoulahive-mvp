@@ -269,9 +269,7 @@ export function FamilyDashboard({
   const active   = data.connections.filter((c) => c.status === 'accepted')
   const pending  = data.connections.filter((c) => c.status === 'pending')
   const declined = data.connections.filter((c) => c.status === 'declined')
-
-  // All non-declined conversations, active first then pending
-  const conversations = [...active, ...pending]
+  const anyConnections = active.length > 0 || pending.length > 0
 
   return (
     <main className="mx-auto min-h-screen max-w-5xl px-4 py-10 sm:px-6">
@@ -292,20 +290,37 @@ export function FamilyDashboard({
           {/* ── Main column (2/3) ──────────────────────────────────────────── */}
           <div className="space-y-8 lg:col-span-2">
 
-            {/* Active Conversations — shows accepted + pending, or empty state */}
+            {/* ── Pending Connections — only shown when doula hasn't accepted ── */}
+            {pending.length > 0 && (
+              <section>
+                <h2 className="mb-4 font-arinoe text-2xl" style={{ color: '#90EBD2' }}>
+                  Pending Connections
+                </h2>
+                <div className="space-y-3">
+                  {pending.map((conn) => (
+                    <PendingRow key={conn.id} conn={conn} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* ── Active Conversations — only accepted connections ───────────── */}
             <section>
               <h2 className="mb-4 font-arinoe text-2xl text-brand-orange">
                 Active Conversations
               </h2>
-              {conversations.length === 0 ? (
-                <EmptyConversations />
+              {active.length === 0 ? (
+                anyConnections ? (
+                  <p className="text-sm font-abel text-dark-green/60 italic">
+                    No active conversations yet — hopefully soon!
+                  </p>
+                ) : (
+                  <EmptyConversations />
+                )
               ) : (
                 <div className="space-y-3">
                   {active.map((conn) => (
                     <ActiveRow key={conn.id} conn={conn} userId={userId} />
-                  ))}
-                  {pending.map((conn) => (
-                    <PendingRow key={conn.id} conn={conn} />
                   ))}
                 </div>
               )}
