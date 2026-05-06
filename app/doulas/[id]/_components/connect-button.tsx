@@ -7,13 +7,19 @@ import { createClient } from '@/lib/supabase/client'
 type Phase = 'idle' | 'form' | 'submitting' | 'done'
 
 interface ConnectButtonProps {
-  doulaProfileId: string
-  doulaName: string
-  returnPath: string
+  doulaProfileId:   string
+  doulaName:        string
+  returnPath:       string
+  alreadyConnected?: boolean
 }
 
-export function ConnectButton({ doulaProfileId, doulaName, returnPath }: ConnectButtonProps) {
-  const [phase, setPhase] = useState<Phase>('idle')
+export function ConnectButton({
+  doulaProfileId,
+  doulaName,
+  returnPath,
+  alreadyConnected = false,
+}: ConnectButtonProps) {
+  const [phase, setPhase] = useState<Phase>(() => alreadyConnected ? 'done' : 'idle')
   const [note, setNote]   = useState('')
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
@@ -84,7 +90,7 @@ export function ConnectButton({ doulaProfileId, doulaName, returnPath }: Connect
 
   if (phase === 'form' || phase === 'submitting') {
     return (
-      <div className="rounded-xl border-2 border-dark-green bg-card p-6 space-y-4">
+      <div className="rounded-xl border-2 border-dark-green bg-[#F9F4E0] p-6 space-y-4">
         <div>
           <label className="block text-sm font-abel font-medium text-dark-green">
             What caught your attention?
@@ -98,7 +104,7 @@ export function ConnectButton({ doulaProfileId, doulaName, returnPath }: Connect
             placeholder="Tell them what resonated with you…"
             rows={4}
             disabled={phase === 'submitting'}
-            className="mt-2 w-full resize-none rounded-lg border-2 border-dark-green/40 bg-white px-3 py-2 text-sm font-abel text-dark-green placeholder:text-dark-green/40 focus:outline-none focus:border-dark-green disabled:opacity-60"
+            className="mt-2 w-full resize-none rounded-lg border-2 border-dark-green/40 bg-cotton px-3 py-2 text-sm font-abel text-dark-green placeholder:text-dark-green/40 focus:outline-none focus:border-dark-green disabled:opacity-60"
           />
         </div>
 
@@ -109,7 +115,7 @@ export function ConnectButton({ doulaProfileId, doulaName, returnPath }: Connect
             type="button"
             onClick={handleSubmit}
             disabled={!note.trim() || phase === 'submitting'}
-            className="rounded-xl bg-dark-green px-6 py-2.5 text-sm font-abel font-medium text-cotton hover:opacity-80 transition-opacity disabled:opacity-40"
+            className="rounded-full bg-dark-green px-6 py-2.5 text-sm font-abel font-medium text-cotton transition-colors duration-200 hover:bg-[#F55CB1] disabled:opacity-40"
           >
             {phase === 'submitting' ? 'Sending…' : 'Send connection request'}
           </button>
@@ -117,7 +123,7 @@ export function ConnectButton({ doulaProfileId, doulaName, returnPath }: Connect
             type="button"
             onClick={() => { setPhase('idle'); setError(null) }}
             disabled={phase === 'submitting'}
-            className="rounded-xl border-2 border-dark-green px-5 py-2.5 text-sm font-abel font-medium text-dark-green hover:bg-dark-green hover:text-cotton transition-colors disabled:opacity-40"
+            className="rounded-full border-2 border-dark-green px-5 py-2.5 text-sm font-abel font-medium text-dark-green hover:bg-dark-green hover:text-cotton transition-colors disabled:opacity-40"
           >
             Cancel
           </button>
@@ -126,17 +132,30 @@ export function ConnectButton({ doulaProfileId, doulaName, returnPath }: Connect
     )
   }
 
-  // Idle
+  // Idle — inline button + sticky pill
   return (
-    <div>
-      {error && <p className="mb-3 text-sm font-abel text-destructive">{error}</p>}
-      <button
-        type="button"
-        onClick={handleOpen}
-        className="w-full rounded-xl bg-dark-green px-6 py-3 text-base font-abel font-medium text-cotton hover:opacity-80 transition-opacity sm:w-auto"
-      >
-        Connect with {doulaName}
-      </button>
-    </div>
+    <>
+      <div>
+        {error && <p className="mb-3 text-sm font-abel text-destructive">{error}</p>}
+        <button
+          type="button"
+          onClick={handleOpen}
+          className="w-full rounded-full bg-dark-green px-6 py-3 text-base font-abel font-medium text-cotton transition-colors duration-200 hover:bg-[#F55CB1] sm:w-auto"
+        >
+          Connect with {doulaName}
+        </button>
+      </div>
+
+      {/* Sticky pill — fixed to bottom of viewport */}
+      <div className="pointer-events-none fixed bottom-6 left-0 right-0 z-40 flex justify-center">
+        <button
+          type="button"
+          onClick={handleOpen}
+          className="pointer-events-auto rounded-full bg-dark-green px-8 py-3 font-abel text-base font-medium text-cotton shadow-[0_4px_16px_rgba(7,64,59,0.25)] transition-colors duration-200 hover:bg-[#F55CB1]"
+        >
+          Connect with {doulaName}
+        </button>
+      </div>
+    </>
   )
 }
