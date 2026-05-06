@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Baby, Heart, MapPin, Star, Translate, type Icon as PhosphorIcon } from '@phosphor-icons/react'
+import { Baby, Heart, MapPin, Star, UserSound, type Icon as PhosphorIcon } from '@phosphor-icons/react'
 import { DoulaCard } from './doula-card'
 import type { DoulaListItem } from './doula-card'
 
@@ -247,86 +247,93 @@ export function DolaGrid({
 
         {/* Filter controls */}
         <div className={`${filtersOpen ? 'mt-4' : 'hidden'} sm:block`}>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
 
-            {/* Location */}
-            <div>
-              <FilterLabel icon={MapPin} iconClass="text-[#FE7040]">Location</FilterLabel>
-              <input
-                type="text"
-                placeholder="e.g. London"
-                value={filters.location}
-                onChange={(e) => setFilters((f) => ({ ...f, location: e.target.value }))}
-                className="w-full rounded-lg border-2 border-cotton/40 bg-white/10 px-3 py-2 text-sm font-abel text-cotton placeholder:text-cotton/40 focus:outline-none focus:border-cotton"
-              />
-            </div>
+            {/* ── Left stack: Location / Support type / Birth setting ─────── */}
+            <div className="flex flex-col gap-4 sm:w-[220px] sm:shrink-0">
 
-            {/* Support type */}
-            <div>
-              <FilterLabel icon={Heart} iconClass="text-[#F693C1]">Support type</FilterLabel>
-              <div className="flex flex-wrap gap-2">
-                {SUPPORT_TYPE_OPTIONS.map((t) => (
-                  <FilterChip
-                    key={t}
-                    label={t}
-                    active={filters.supportType.includes(t)}
-                    colorScheme="pink"
-                    onClick={() => setFilters((f) => ({ ...f, supportType: toggle(f.supportType, t) }))}
-                  />
-                ))}
+              {/* Location */}
+              <div>
+                <FilterLabel icon={MapPin} iconClass="text-[#FE7040]">Location</FilterLabel>
+                <input
+                  type="text"
+                  placeholder="e.g. London"
+                  value={filters.location}
+                  onChange={(e) => setFilters((f) => ({ ...f, location: e.target.value }))}
+                  className="w-full rounded-lg border-2 border-cotton/40 bg-white/10 px-3 py-2 text-sm font-abel text-cotton placeholder:text-cotton/40 focus:outline-none focus:border-cotton"
+                />
               </div>
-            </div>
 
-            {/* Birth setting */}
-            <div>
-              <FilterLabel icon={Baby} iconClass="text-[#90EBD2]">Birth setting</FilterLabel>
-              <div className="flex flex-wrap gap-2">
-                {BIRTH_SETTING_OPTIONS.map((s) => (
-                  <FilterChip
-                    key={s}
-                    label={settingLabel(s)}
-                    active={filters.birthSetting.includes(s)}
-                    colorScheme="blue"
-                    onClick={() => setFilters((f) => ({ ...f, birthSetting: toggle(f.birthSetting, s) }))}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Specialisms — collapsible */}
-            <div>
-              <button
-                type="button"
-                className="mb-2 flex w-full items-center justify-between"
-                onClick={() => setSpecialismOpen((o) => !o)}
-              >
-                <span className="flex items-center gap-1.5 font-arinoe text-[11px] uppercase tracking-[0.14em] text-cotton">
-                  <Star size={13} weight="duotone" className="text-olive" aria-hidden />
-                  Specialism
-                  {filters.specialisms.length > 0 && (
-                    <span className="ml-0.5 font-abel text-cotton/60">({filters.specialisms.length})</span>
-                  )}
-                </span>
-                <svg className={`h-3.5 w-3.5 text-cotton/60 transition-transform ${specialismOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {specialismOpen && (
-                <div className="mt-1 max-h-48 overflow-y-auto rounded-lg border-2 border-cotton/20 bg-dark-green/60 p-1 scrollbar-orange">
-                  {SPECIALISM_OPTIONS.map((s) => (
-                    <OliveCheckbox
-                      key={s}
-                      label={s}
-                      checked={filters.specialisms.includes(s)}
-                      onChange={() => setFilters((f) => ({ ...f, specialisms: toggle(f.specialisms, s) }))}
+              {/* Support type */}
+              <div>
+                <FilterLabel icon={Heart} iconClass="text-[#F693C1]">Support type</FilterLabel>
+                <div className="flex flex-wrap gap-2">
+                  {SUPPORT_TYPE_OPTIONS.map((t) => (
+                    <FilterChip
+                      key={t}
+                      label={t}
+                      active={filters.supportType.includes(t)}
+                      colorScheme="pink"
+                      onClick={() => setFilters((f) => ({ ...f, supportType: toggle(f.supportType, t) }))}
                     />
                   ))}
                 </div>
-              )}
+              </div>
+
+              {/* Birth setting */}
+              <div>
+                <FilterLabel icon={Baby} iconClass="text-[#90EBD2]">Birth setting</FilterLabel>
+                <div className="flex flex-wrap gap-2">
+                  {BIRTH_SETTING_OPTIONS.map((s) => (
+                    <FilterChip
+                      key={s}
+                      label={settingLabel(s)}
+                      active={filters.birthSetting.includes(s)}
+                      colorScheme="blue"
+                      onClick={() => setFilters((f) => ({ ...f, birthSetting: toggle(f.birthSetting, s) }))}
+                    />
+                  ))}
+                </div>
+              </div>
+
             </div>
 
-            {/* Language — collapsible */}
-            {languages.length > 0 && (
+            {/* ── Right: Specialism + Language dropdowns side by side ──────── */}
+            <div className="grid flex-1 grid-cols-2 gap-4">
+
+              {/* Specialisms — collapsible */}
+              <div>
+                <button
+                  type="button"
+                  className="mb-2 flex w-full items-center justify-between"
+                  onClick={() => setSpecialismOpen((o) => !o)}
+                >
+                  <span className="flex items-center gap-1.5 font-arinoe text-[11px] uppercase tracking-[0.14em] text-cotton">
+                    <Star size={13} weight="duotone" className="text-olive" aria-hidden />
+                    Specialism
+                    {filters.specialisms.length > 0 && (
+                      <span className="ml-0.5 font-abel text-cotton/60">({filters.specialisms.length})</span>
+                    )}
+                  </span>
+                  <svg className={`h-3.5 w-3.5 text-cotton/60 transition-transform ${specialismOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {specialismOpen && (
+                  <div className="mt-1 max-h-48 overflow-y-auto rounded-lg border-2 border-cotton/20 bg-dark-green/60 p-1 scrollbar-olive">
+                    {SPECIALISM_OPTIONS.map((s) => (
+                      <OliveCheckbox
+                        key={s}
+                        label={s}
+                        checked={filters.specialisms.includes(s)}
+                        onChange={() => setFilters((f) => ({ ...f, specialisms: toggle(f.specialisms, s) }))}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Language — collapsible */}
               <div>
                 <button
                   type="button"
@@ -334,7 +341,7 @@ export function DolaGrid({
                   onClick={() => setLanguageOpen((o) => !o)}
                 >
                   <span className="flex items-center gap-1.5 font-arinoe text-[11px] uppercase tracking-[0.14em] text-cotton">
-                    <Translate size={13} weight="duotone" className="text-cotton" aria-hidden />
+                    <UserSound size={13} weight="duotone" className="text-[#FFE404]" aria-hidden />
                     Language
                     {filters.languages.length > 0 && (
                       <span className="ml-0.5 font-abel text-cotton/60">({filters.languages.length})</span>
@@ -345,19 +352,22 @@ export function DolaGrid({
                   </svg>
                 </button>
                 {languageOpen && (
-                  <div className="mt-1 max-h-48 overflow-y-auto rounded-lg border-2 border-cotton/20 bg-dark-green/60 p-1 scrollbar-orange">
-                    {languages.map((l) => (
+                  <div className="mt-1 max-h-48 overflow-y-auto rounded-lg border-2 border-cotton/20 bg-dark-green/60 p-1 scrollbar-yellow">
+                    {languages.length > 0 ? languages.map((l) => (
                       <OliveCheckbox
                         key={l}
                         label={l}
                         checked={filters.languages.includes(l)}
                         onChange={() => setFilters((f) => ({ ...f, languages: toggle(f.languages, l) }))}
                       />
-                    ))}
+                    )) : (
+                      <p className="px-2 py-2 text-xs font-abel text-cotton/50">No languages listed yet.</p>
+                    )}
                   </div>
                 )}
               </div>
-            )}
+
+            </div>
           </div>
 
           {/* Clear filters */}

@@ -148,6 +148,14 @@ mux-player {
 .scrollbar-orange::-webkit-scrollbar-track  { background: #F9F4E0; border-radius: 2px; }
 .scrollbar-orange::-webkit-scrollbar-thumb  { background: #FE7040; border-radius: 2px; }
 
+.scrollbar-olive::-webkit-scrollbar         { width: 4px; }
+.scrollbar-olive::-webkit-scrollbar-track   { background: rgba(7,64,59,0.6); border-radius: 2px; }
+.scrollbar-olive::-webkit-scrollbar-thumb   { background: #95A733; border-radius: 2px; }
+
+.scrollbar-yellow::-webkit-scrollbar        { width: 4px; }
+.scrollbar-yellow::-webkit-scrollbar-track  { background: rgba(7,64,59,0.6); border-radius: 2px; }
+.scrollbar-yellow::-webkit-scrollbar-thumb  { background: #FFE404; border-radius: 2px; }
+
 /* ═══════════════════════════════════════════════════════════════════
    Chrome autofill override — forces cotton bg + dark green text
    across all form pages (login, signup, onboarding)
