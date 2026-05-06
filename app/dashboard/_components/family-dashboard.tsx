@@ -201,15 +201,15 @@ function BrowseCard() {
   return (
     <div className="rounded-xl border-2 border-dark-green bg-cotton px-5 py-5 space-y-3">
       <div className="flex items-center gap-2">
-        <MagnifyingGlass size={20} weight="duotone" className="shrink-0 text-olive" aria-hidden />
-        <h3 className="font-arinoe text-xl text-olive">Keep Browsing</h3>
+        <MagnifyingGlass size={20} weight="duotone" className="shrink-0 text-dark-green" aria-hidden />
+        <h3 className="font-arinoe text-xl text-dark-green">Keep Browsing</h3>
       </div>
       <p className="text-sm font-abel text-dark-green/80 leading-relaxed">
         The right doula is out there. Watch a few more videos and see who feels right.
       </p>
       <Link
         href="/doulas"
-        className="inline-block rounded-full bg-dark-green px-5 py-2 text-sm font-abel font-bold text-cotton transition-colors hover:bg-olive hover:text-cotton"
+        className="inline-block rounded-full bg-dark-green px-5 py-2 text-sm font-abel font-bold text-cotton transition-colors duration-200 hover:bg-[#F55CB1]"
       >
         Browse doulas →
       </Link>
@@ -231,8 +231,8 @@ function ProfileCard({
   return (
     <div className="rounded-xl border-2 border-dark-green bg-cotton px-5 py-5 space-y-4">
       <div className="flex items-center gap-2">
-        <Baby size={24} weight="duotone" className="shrink-0 text-brand-orange" aria-hidden />
-        <h3 className="font-arinoe text-xl text-brand-orange">Your Profile</h3>
+        <Baby size={24} weight="duotone" className="shrink-0 text-dark-green" aria-hidden />
+        <h3 className="font-arinoe text-xl text-dark-green">Your Profile</h3>
       </div>
       <div className="space-y-2">
         {formattedDue && (
