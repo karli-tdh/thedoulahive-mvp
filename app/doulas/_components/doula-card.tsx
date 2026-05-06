@@ -49,15 +49,17 @@ function SectionLabel({ children, className = 'text-dark-green/50', icon: Icon, 
 // ── Component ────────────────────────────────────────────────────────────────
 
 export function DoulaCard({ doula }: { doula: DoulaListItem }) {
-  const [playing, setPlaying] = useState(false)
+  const [playing, setPlaying]                 = useState(false)
+  const [specialismsExpanded, setSpecialismsExpanded] = useState(false)
 
-  const name           = doula.profiles?.full_name ?? 'Doula'
-  const location       = doula.profiles?.location
-  const topSpecialisms = (doula.specialisms ?? []).slice(0, 3)
-  const extraCount     = Math.max(0, (doula.specialisms?.length ?? 0) - 3)
+  const name            = doula.profiles?.full_name ?? 'Doula'
+  const location        = doula.profiles?.location
+  const allSpecialisms  = doula.specialisms ?? []
+  const visibleSpecialisms = specialismsExpanded ? allSpecialisms : allSpecialisms.slice(0, 3)
+  const extraCount      = Math.max(0, allSpecialisms.length - 3)
   const hasSupportType  = (doula.support_types?.length ?? 0) > 0
   const hasBirthSetting = (doula.birth_settings?.length ?? 0) > 0
-  const hasSpecialisms  = topSpecialisms.length > 0
+  const hasSpecialisms  = allSpecialisms.length > 0
 
   return (
     <article className="flex flex-col rounded-2xl border-2 border-dark-green bg-cotton overflow-hidden transition-transform duration-200 hover:-translate-y-1 shadow-[2px_2px_0px_#07403B] hover:shadow-[4px_4px_0px_#07403B]">
@@ -191,15 +193,19 @@ export function DoulaCard({ doula }: { doula: DoulaListItem }) {
           <div className="space-y-1.5">
             <SectionLabel icon={Star} iconClass="text-olive" className="text-olive">Specialisms</SectionLabel>
             <div className="flex flex-wrap gap-1.5">
-              {topSpecialisms.map((s) => (
+              {visibleSpecialisms.map((s) => (
                 <span key={s} className="rounded-full bg-olive px-2.5 py-0.5 text-xs font-abel font-medium text-cotton">
                   {s}
                 </span>
               ))}
-              {extraCount > 0 && (
-                <span className="rounded-full border border-dark-green/30 px-2.5 py-0.5 text-xs font-abel text-dark-green/50">
+              {!specialismsExpanded && extraCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setSpecialismsExpanded(true)}
+                  className="rounded-full border border-dark-green/30 px-2.5 py-0.5 text-xs font-abel text-dark-green/50 transition-colors hover:border-dark-green/60 hover:text-dark-green/80"
+                >
                   +{extraCount} more
-                </span>
+                </button>
               )}
             </div>
           </div>
