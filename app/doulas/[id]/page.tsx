@@ -8,10 +8,10 @@ import {
   Car,
   Certificate,
   CurrencyGbp,
+  HandHeart,
   Heart,
   MapPin,
   Star,
-  Users,
   UserSound,
 } from '@phosphor-icons/react/dist/ssr'
 import { ConnectButton } from './_components/connect-button'
@@ -254,7 +254,7 @@ export default async function DoulaProfilePage({ params }: PageProps) {
         {hasFactRow && (
           <div className="mt-6 divide-y divide-dark-green/10 rounded-xl border-2 border-dark-green/10 px-4">
             {doula.price_range && (
-              <FactRow icon={CurrencyGbp} iconClass="text-olive">
+              <FactRow icon={CurrencyGbp} iconClass="text-dark-green">
                 From {doula.price_range}
               </FactRow>
             )}
@@ -264,7 +264,7 @@ export default async function DoulaProfilePage({ params }: PageProps) {
               </FactRow>
             )}
             {doula.clients_supported && (
-              <FactRow icon={Users} iconClass="text-dark-green">
+              <FactRow icon={HandHeart} iconClass="text-dark-green">
                 {doula.clients_supported} clients supported
               </FactRow>
             )}
