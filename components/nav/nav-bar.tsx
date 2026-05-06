@@ -25,7 +25,7 @@ export async function NavBar() {
 
   const role = (profile?.role as 'doula' | 'family') ?? null
 
-  // For doulas, count pending connection requests for the nav badge
+  // Badge count: doulas → pending connection requests; families → "your turn" active conversations
   let pendingCount = 0
   if (role === 'doula') {
     try {
@@ -41,6 +41,30 @@ export async function NavBar() {
           .select('id', { count: 'exact', head: true })
           .eq('doula_id', dp.id)
           .eq('status', 'pending')
+        pendingCount = count ?? 0
+      }
+    } catch {
+      pendingCount = 0
+    }
+  }
+
+  if (role === 'family') {
+    try {
+      const { data: fp } = await supabase
+        .from('family_profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (fp) {
+        // Count active conversations where the doula replied last (family's turn)
+        const { count } = await supabase
+          .from('connections')
+          .select('id', { count: 'exact', head: true })
+          .eq('family_id', fp.id)
+          .eq('status', 'accepted')
+          .not('last_message_sender_id', 'is', null)
+          .neq('last_message_sender_id', user.id)
         pendingCount = count ?? 0
       }
     } catch {

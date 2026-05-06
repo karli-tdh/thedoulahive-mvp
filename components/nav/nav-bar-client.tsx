@@ -104,9 +104,10 @@ export function NavBarClient({ role, pendingCount }: Props) {
               </Link>
               <Link
                 href="/dashboard"
-                className="rounded-full px-3 py-1.5 text-sm text-cotton/80 hover:bg-white/10 hover:text-cotton transition-colors"
+                className="relative flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-cotton/80 hover:bg-white/10 hover:text-cotton transition-colors"
               >
                 My conversations
+                <HexBadge count={pendingCount} />
               </Link>
               <button
                 type="button"

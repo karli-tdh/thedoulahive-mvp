@@ -234,6 +234,33 @@ function ProfileCard({
   )
 }
 
+// ── Honeycomb badge ───────────────────────────────────────────────────────────
+
+function HexBadge({ count, fill, textClass }: {
+  count:     number
+  fill:      string
+  textClass: string
+}) {
+  if (count === 0) return null
+  return (
+    <span className="relative inline-flex h-[24px] w-[21px] shrink-0 items-center justify-center">
+      <svg viewBox="0 0 980.68 1080" className="absolute inset-0 h-full w-full" aria-hidden>
+        <path
+          fill={fill}
+          d="M884.66,265.76L523.27,57.11c-23.22-13.41-51.83-13.41-75.06,0L86.82,265.76
+             c-23.22,13.41-37.53,38.19-37.53,65v417.3c0,26.82,14.31,51.59,37.53,65
+             l361.4,208.65c23.22,13.41,51.83,13.41,75.06,0l361.39-208.65
+             c23.22-13.41,37.53-38.19,37.53-65v-417.3
+             c0-26.81-14.31-51.59-37.53-65Z"
+        />
+      </svg>
+      <span className={`relative text-[10px] font-abel font-bold leading-none ${textClass}`}>
+        {count > 9 ? '9+' : count}
+      </span>
+    </span>
+  )
+}
+
 // ── Tinted empty state block ─────────────────────────────────────────────────
 
 function EmptyState({
@@ -268,6 +295,11 @@ export function FamilyDashboard({
   const declined = data.connections.filter((c) => c.status === 'declined')
   const anyConnections = active.length > 0 || pending.length > 0
 
+  // Active conversations where the doula replied last → family's turn
+  const yourTurnCount = active.filter(
+    (c) => c.last_message_sender_id !== null && c.last_message_sender_id !== userId
+  ).length
+
   return (
     <main className="mx-auto min-h-screen max-w-5xl px-4 py-10 sm:px-6">
       <ConnectionsRealtime profileField="family_id" profileId={data.family_profile_id} />
@@ -289,8 +321,9 @@ export function FamilyDashboard({
 
             {/* ── Pending Connections — always visible ──────────────────────── */}
             <section>
-              <h2 className="mb-4 font-arinoe text-2xl" style={{ color: '#90EBD2' }}>
+              <h2 className="mb-4 flex items-center gap-2 font-arinoe text-2xl" style={{ color: '#90EBD2' }}>
                 Pending Connections
+                <HexBadge count={pending.length} fill="#90EBD2" textClass="text-dark-green" />
               </h2>
               {pending.length === 0 ? (
                 <EmptyState tint="blue">
@@ -309,8 +342,9 @@ export function FamilyDashboard({
 
             {/* ── Active Conversations — only accepted connections ───────────── */}
             <section>
-              <h2 className="mb-4 font-arinoe text-2xl text-brand-orange">
+              <h2 className="mb-4 flex items-center gap-2 font-arinoe text-2xl text-brand-orange">
                 Active Conversations
+                <HexBadge count={yourTurnCount} fill="#FE7040" textClass="text-cotton" />
               </h2>
               {active.length === 0 ? (
                 <EmptyState tint="orange">
