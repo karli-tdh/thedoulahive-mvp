@@ -4,7 +4,7 @@ import { useState } from 'react'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MapPin, VideoCamera } from '@phosphor-icons/react'
+import { CurrencyGbp, MapPin, VideoCamera } from '@phosphor-icons/react'
 
 // MuxPlayer — SSR off (uses browser APIs)
 const MuxPlayer = dynamic(() => import('@mux/mux-player-react'), { ssr: false })
@@ -19,6 +19,7 @@ export interface DoulaListItem {
   specialisms: string[] | null
   price_range: string | null
   intro_video_id: string | null
+  circle_verified: boolean | null
   profiles: { full_name: string | null; location: string | null } | null
 }
 
@@ -27,6 +28,15 @@ export interface DoulaListItem {
 function shortSetting(s: string) {
   if (s.toLowerCase().includes('mlu') || s.toLowerCase().includes('midwife')) return 'MLU'
   return s
+}
+
+// Muted small-caps section label used for "In her words" / "Specialisms"
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-[10px] font-abel font-medium uppercase tracking-widest text-dark-green/50">
+      {children}
+    </p>
+  )
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -38,6 +48,7 @@ export function DoulaCard({ doula }: { doula: DoulaListItem }) {
   const location       = doula.profiles?.location
   const topSpecialisms = (doula.specialisms ?? []).slice(0, 3)
   const extraCount     = Math.max(0, (doula.specialisms?.length ?? 0) - 3)
+  const hasSpecialisms = topSpecialisms.length > 0
 
   return (
     <article className="flex flex-col rounded-2xl border-2 border-dark-green bg-cotton overflow-hidden transition-transform duration-200 hover:-translate-y-1 shadow-[2px_2px_0px_#07403B] hover:shadow-[4px_4px_0px_#07403B]">
@@ -46,7 +57,6 @@ export function DoulaCard({ doula }: { doula: DoulaListItem }) {
       <div className="relative w-full overflow-hidden" style={{ aspectRatio: '9/16' }}>
 
         {playing && doula.intro_video_id ? (
-          /* Inline player fills the portrait container edge-to-edge */
           <div className="absolute inset-0">
             <MuxPlayer
               playbackId={doula.intro_video_id}
@@ -58,36 +68,28 @@ export function DoulaCard({ doula }: { doula: DoulaListItem }) {
             />
           </div>
         ) : doula.intro_video_id ? (
-          /* Thumbnail with centred play button */
           <button
             type="button"
             onClick={() => setPlaying(true)}
-            className="group absolute inset-0 w-full h-full"
+            className="group absolute inset-0 h-full w-full"
             aria-label={`Play ${name}'s intro video`}
           >
             <Image
               src={`https://image.mux.com/${doula.intro_video_id}/thumbnail.jpg?time=0&width=480&fit_mode=smartcrop&height=853`}
               alt=""
               fill
-              sizes="(max-width: 640px) 100vw, 50vw"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="object-cover"
             />
-            {/* Overlay + play circle */}
             <div className="absolute inset-0 flex items-center justify-center bg-black/15 transition-colors group-hover:bg-black/30">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-cotton shadow-lg ring-2 ring-dark-green/20 transition-transform group-hover:scale-105">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="h-7 w-7 translate-x-0.5 text-dark-green"
-                  aria-hidden
-                >
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-cotton shadow-lg ring-2 ring-dark-green/20 transition-transform group-hover:scale-105">
+                <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 translate-x-0.5 text-dark-green" aria-hidden>
                   <path d="M8 5v14l11-7z" />
                 </svg>
               </div>
             </div>
           </button>
         ) : (
-          /* No video — cotton placeholder */
           <div className="absolute inset-0 flex items-center justify-center bg-cotton">
             <VideoCamera size={48} weight="duotone" className="text-dark-green/20" aria-hidden />
           </div>
@@ -96,75 +98,96 @@ export function DoulaCard({ doula }: { doula: DoulaListItem }) {
       </div>
 
       {/* ── Card content ────────────────────────────────────────────────── */}
-      <div className="flex flex-1 flex-col gap-3 p-5">
+      <div className="flex flex-1 flex-col gap-3 p-4">
 
-        {/* Name */}
-        <p className="font-arinoe text-xl font-bold text-dark-green">{name}</p>
+        {/* Name + verified badge */}
+        <div className="flex items-center gap-1.5">
+          <p className="font-arinoe text-lg font-bold text-dark-green">{name}</p>
+          {doula.circle_verified && (
+            <span className="group/badge relative inline-flex h-[18px] w-[16px] shrink-0 cursor-default items-center justify-center">
+              {/* Honeycomb — sunny yellow */}
+              <svg viewBox="0 0 980.68 1080" className="absolute inset-0 h-full w-full" aria-hidden>
+                <path
+                  fill="#FFE404"
+                  d="M884.66,265.76L523.27,57.11c-23.22-13.41-51.83-13.41-75.06,0L86.82,265.76
+                     c-23.22,13.41-37.53,38.19-37.53,65v417.3c0,26.82,14.31,51.59,37.53,65
+                     l361.4,208.65c23.22,13.41,51.83,13.41,75.06,0l361.39-208.65
+                     c23.22-13.41,37.53-38.19,37.53-65v-417.3
+                     c0-26.81-14.31-51.59-37.53-65Z"
+                />
+              </svg>
+              {/* Checkmark inside */}
+              <span className="relative text-[7px] font-bold leading-none text-dark-green">✓</span>
+              {/* Tooltip */}
+              <span className="pointer-events-none absolute bottom-full left-1/2 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-lg bg-dark-green px-2.5 py-1 text-[10px] font-abel text-cotton opacity-0 shadow-md transition-opacity group-hover/badge:opacity-100">
+                Verified Hive member
+              </span>
+            </span>
+          )}
+        </div>
 
-        {/* Location */}
-        {location && (
-          <div className="flex items-center gap-1.5">
-            <MapPin size={13} weight="duotone" className="shrink-0 text-[#FE7040]" aria-hidden />
-            <span className="text-sm font-abel text-dark-green/70">{location}</span>
+        {/* Icon attribute row */}
+        <div className="flex flex-col gap-1">
+          {location && (
+            <div className="flex items-center gap-1.5">
+              <MapPin size={13} weight="duotone" className="shrink-0 text-[#FE7040]" aria-hidden />
+              <span className="text-sm font-abel text-dark-green/70">{location}</span>
+            </div>
+          )}
+          {doula.price_range && (
+            <div className="flex items-center gap-1.5">
+              <CurrencyGbp size={13} weight="duotone" className="shrink-0 text-olive" aria-hidden />
+              <span className="text-sm font-abel text-dark-green/70">From {doula.price_range}</span>
+            </div>
+          )}
+        </div>
+
+        {/* "In her words" + tagline blockquote */}
+        {doula.tagline && (
+          <div className="space-y-1">
+            <SectionLabel>In her words</SectionLabel>
+            <blockquote className="border-l-[3px] border-[#F693C1] pl-3 text-sm font-abel font-medium leading-snug text-dark-green">
+              {doula.tagline}
+            </blockquote>
           </div>
         )}
 
-        {/* Tagline — blockquote prompt style */}
-        {doula.tagline && (
-          <blockquote className="border-l-[3px] border-[#F693C1] pl-3 text-base font-abel font-medium leading-snug text-dark-green">
-            {doula.tagline}
-          </blockquote>
-        )}
-
-        {/* Pills */}
-        {((doula.support_types?.length ?? 0) > 0 ||
-          (doula.birth_settings?.length ?? 0) > 0 ||
-          topSpecialisms.length > 0) && (
+        {/* Support type + birth setting pills */}
+        {((doula.support_types?.length ?? 0) > 0 || (doula.birth_settings?.length ?? 0) > 0) && (
           <div className="flex flex-wrap gap-1.5">
-            {/* Support type — light pink */}
             {doula.support_types?.map((t) => (
-              <span
-                key={t}
-                className="rounded-full bg-[#F693C1] px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green"
-              >
+              <span key={t} className="rounded-full bg-[#F693C1] px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green">
                 {t}
               </span>
             ))}
-            {/* Birth setting — light blue */}
             {doula.birth_settings?.map((s) => (
-              <span
-                key={s}
-                className="rounded-full bg-[#90EBD2] px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green"
-              >
+              <span key={s} className="rounded-full bg-[#90EBD2] px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green">
                 {shortSetting(s)}
               </span>
             ))}
-            {/* Specialisms — olive */}
-            {topSpecialisms.map((s) => (
-              <span
-                key={s}
-                className="rounded-full bg-olive px-2.5 py-0.5 text-xs font-abel font-medium text-cotton"
-              >
-                {s}
-              </span>
-            ))}
-            {extraCount > 0 && (
-              <span className="rounded-full border border-dark-green/30 px-2.5 py-0.5 text-xs font-abel text-dark-green/50">
-                +{extraCount} more
-              </span>
-            )}
           </div>
         )}
 
-        {/* Price */}
-        {doula.price_range && (
-          <p className="text-sm font-abel text-dark-green/80">
-            <span className="mr-0.5 text-xs text-dark-green/40">£</span>
-            {doula.price_range}
-          </p>
+        {/* "Specialisms" label + specialism pills */}
+        {hasSpecialisms && (
+          <div className="space-y-1.5">
+            <SectionLabel>Specialisms</SectionLabel>
+            <div className="flex flex-wrap gap-1.5">
+              {topSpecialisms.map((s) => (
+                <span key={s} className="rounded-full bg-olive px-2.5 py-0.5 text-xs font-abel font-medium text-cotton">
+                  {s}
+                </span>
+              ))}
+              {extraCount > 0 && (
+                <span className="rounded-full border border-dark-green/30 px-2.5 py-0.5 text-xs font-abel text-dark-green/50">
+                  +{extraCount} more
+                </span>
+              )}
+            </div>
+          </div>
         )}
 
-        {/* View profile — full-width pill */}
+        {/* View profile — full-width pill, pushed to bottom */}
         <div className="mt-auto pt-3">
           <Link
             href={`/doulas/${doula.id}`}
