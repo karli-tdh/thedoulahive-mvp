@@ -1,10 +1,15 @@
 'use client'
 
+import { useState } from 'react'
+import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Baby, MagnifyingGlass, VideoCamera } from '@phosphor-icons/react'
 import { ConnectionsRealtime } from './connections-realtime'
 import type { FamilyDashboardData, FamilyConnection } from '../page'
+
+// MuxPlayer — SSR off
+const MuxPlayer = dynamic(() => import('@mux/mux-player-react'), { ssr: false })
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -29,54 +34,78 @@ function doulaFirstName(fullName: string | null): string {
   return fullName.trim().split(/\s+/)[0]
 }
 
-// ── Shared thumbnail block ────────────────────────────────────────────────────
+// ── Portrait thumbnail with inline play ──────────────────────────────────────
 
-function VideoThumbnail({ playbackId, alt }: { playbackId: string | null; alt: string }) {
-  if (playbackId) {
-    return (
-      <div className="relative h-[75px] w-[100px] shrink-0 overflow-hidden rounded-lg">
-        <Image
-          src={`https://image.mux.com/${playbackId}/thumbnail.jpg?time=0`}
-          alt={alt}
-          fill
-          className="object-cover"
-          sizes="100px"
-        />
-      </div>
-    )
-  }
+function PortraitVideo({ playbackId, alt }: { playbackId: string | null; alt: string }) {
+  const [playing, setPlaying] = useState(false)
+
   return (
-    <div className="flex h-[75px] w-[100px] shrink-0 items-center justify-center rounded-lg bg-cotton">
-      <VideoCamera size={24} weight="duotone" className="text-dark-green/30" aria-hidden />
+    <div className="relative w-full overflow-hidden" style={{ aspectRatio: '9/16' }}>
+      {playing && playbackId ? (
+        <div className="absolute inset-0">
+          <MuxPlayer
+            playbackId={playbackId}
+            streamType="on-demand"
+            envKey={process.env.NEXT_PUBLIC_MUX_ENV_KEY}
+            autoPlay
+            style={{ width: '100%', height: '100%' }}
+            accentColor="#FE7040"
+          />
+        </div>
+      ) : playbackId ? (
+        <button
+          type="button"
+          onClick={() => setPlaying(true)}
+          className="group absolute inset-0 h-full w-full"
+          aria-label={`Play ${alt}`}
+        >
+          <Image
+            src={`https://image.mux.com/${playbackId}/thumbnail.jpg?time=0&width=480&fit_mode=smartcrop&height=853`}
+            alt=""
+            fill
+            sizes="(max-width: 640px) 100vw, 50vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/15 transition-colors group-hover:bg-black/30">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cotton shadow-lg ring-2 ring-dark-green/20 transition-transform group-hover:scale-105">
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 translate-x-0.5 text-dark-green" aria-hidden>
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </div>
+          </div>
+        </button>
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center bg-cotton">
+          <VideoCamera size={48} weight="duotone" className="text-dark-green/20" aria-hidden />
+        </div>
+      )}
     </div>
   )
 }
 
-// ── Active conversation row ───────────────────────────────────────────────────
+// ── Active conversation card ──────────────────────────────────────────────────
 
-function ActiveRow({ conn, userId }: { conn: FamilyConnection; userId: string }) {
+function ActiveCard({ conn, userId }: { conn: FamilyConnection; userId: string }) {
   const turn = turnLabel(conn.last_message_sender_id, userId, conn.doula_name)
 
   return (
-    <div className="card-hover flex items-center gap-4 rounded-xl border-2 border-dark-green bg-cotton px-4 py-3">
+    <article className="flex flex-col rounded-2xl border-2 border-dark-green bg-cotton overflow-hidden transition-transform duration-200 hover:-translate-y-1 shadow-[2px_2px_0px_#07403B] hover:shadow-[4px_4px_0px_#07403B]">
 
-      <VideoThumbnail
+      <PortraitVideo
         playbackId={conn.doula_video_id}
         alt={conn.doula_name ? `${conn.doula_name} intro video` : 'Doula intro video'}
       />
 
-      <div className="min-w-0 flex-1">
-        <p className="font-arinoe text-lg text-dark-green truncate">
+      <div className="flex flex-1 flex-col gap-3 p-4">
+
+        <p className="font-arinoe text-lg font-bold text-dark-green">
           {conn.doula_name ?? 'Doula'}
         </p>
-        <div className="mt-1 flex flex-wrap items-center gap-2">
-          {conn.doula_location && (
-            <span className="rounded-full bg-dark-green px-2.5 py-0.5 text-xs font-abel font-medium text-cotton">
-              {conn.doula_location}
-            </span>
-          )}
+
+        {/* Status pill */}
+        <div className="flex flex-wrap gap-1.5">
           {turn.yours ? (
-            <span className="rounded-full bg-brand-orange px-2.5 py-0.5 text-xs font-abel font-medium text-cotton">
+            <span className="rounded-full bg-[#FE7040] px-2.5 py-0.5 text-xs font-abel font-medium text-cotton">
               {turn.label}
             </span>
           ) : (
@@ -85,59 +114,60 @@ function ActiveRow({ conn, userId }: { conn: FamilyConnection; userId: string })
             </span>
           )}
         </div>
+
+        {/* Open conversation — pushed to bottom */}
+        <div className="mt-auto pt-3">
+          <Link
+            href={`/dashboard/${conn.id}`}
+            className="block w-full rounded-full bg-dark-green py-2.5 text-center text-sm font-abel font-medium text-cotton transition-colors duration-200 hover:bg-[#F55CB1]"
+          >
+            Open conversation
+          </Link>
+        </div>
+
       </div>
-
-      <Link
-        href={`/dashboard/${conn.id}`}
-        className="shrink-0 rounded-full bg-dark-green px-4 py-1.5 text-xs font-abel font-medium text-cotton hover:opacity-80 transition-opacity"
-      >
-        Open conversation
-      </Link>
-
-    </div>
+    </article>
   )
 }
 
-// ── Pending conversation row ──────────────────────────────────────────────────
+// ── Pending conversation card ─────────────────────────────────────────────────
 
-function PendingRow({ conn }: { conn: FamilyConnection }) {
+function PendingCard({ conn }: { conn: FamilyConnection }) {
   const firstName = doulaFirstName(conn.doula_name)
 
   return (
-    <div className="card-hover flex items-center gap-4 rounded-xl border-2 border-dark-green bg-cotton px-4 py-3">
+    <article className="flex flex-col rounded-2xl border-2 border-dark-green bg-cotton overflow-hidden transition-transform duration-200 hover:-translate-y-1 shadow-[2px_2px_0px_#07403B] hover:shadow-[4px_4px_0px_#07403B]">
 
-      <VideoThumbnail
+      <PortraitVideo
         playbackId={conn.doula_video_id}
         alt={conn.doula_name ? `${conn.doula_name} intro video` : 'Doula intro video'}
       />
 
-      <div className="min-w-0 flex-1">
-        <p className="font-arinoe text-lg text-dark-green truncate">
+      <div className="flex flex-1 flex-col gap-3 p-4">
+
+        <p className="font-arinoe text-lg font-bold text-dark-green">
           {conn.doula_name ?? 'Doula'}
         </p>
-        <div className="mt-1 flex flex-wrap items-center gap-2">
-          {conn.doula_location && (
-            <span className="rounded-full bg-dark-green px-2.5 py-0.5 text-xs font-abel font-medium text-cotton">
-              {conn.doula_location}
-            </span>
-          )}
-          <span
-            className="rounded-full px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green"
-            style={{ background: '#90EBD2' }}
-          >
+
+        {/* Pending status pill */}
+        <div className="flex flex-wrap gap-1.5">
+          <span className="rounded-full bg-[#90EBD2] px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green">
             Waiting for {firstName} to accept
           </span>
         </div>
+
+        {/* View profile — pushed to bottom */}
+        <div className="mt-auto pt-3">
+          <Link
+            href={`/doulas/${conn.doula_profile_id}`}
+            className="block w-full rounded-full bg-dark-green py-2.5 text-center text-sm font-abel font-medium text-cotton transition-colors duration-200 hover:bg-[#F55CB1]"
+          >
+            View profile
+          </Link>
+        </div>
+
       </div>
-
-      <Link
-        href={`/doulas/${conn.doula_profile_id}`}
-        className="shrink-0 text-xs font-abel text-dark-green/60 underline underline-offset-4 hover:text-dark-green transition-colors"
-      >
-        View profile
-      </Link>
-
-    </div>
+    </article>
   )
 }
 
@@ -146,12 +176,10 @@ function PendingRow({ conn }: { conn: FamilyConnection }) {
 function DeclinedCard({ conn }: { conn: FamilyConnection }) {
   return (
     <div className="rounded-xl border-2 border-dark-green/20 bg-cotton p-5 opacity-60">
-      <div>
-        <p className="font-arinoe text-lg text-dark-green">{conn.doula_name ?? 'Doula'}</p>
-        {conn.doula_location && (
-          <p className="text-sm font-abel text-muted-foreground">{conn.doula_location}</p>
-        )}
-      </div>
+      <p className="font-arinoe text-lg text-dark-green">{conn.doula_name ?? 'Doula'}</p>
+      {conn.doula_location && (
+        <p className="mt-0.5 text-sm font-abel text-muted-foreground">{conn.doula_location}</p>
+      )}
       <p className="mt-3 text-sm font-abel text-muted-foreground">
         Not available — you can send a request to another doula anytime.
       </p>
@@ -272,8 +300,8 @@ function EmptyState({
 }) {
   const bg =
     tint === 'blue'
-      ? 'rgba(144, 235, 210, 0.12)'  // light-blue 12%
-      : 'rgba(254, 112, 64, 0.10)'   // brand-orange 10%
+      ? 'rgba(144, 235, 210, 0.12)'
+      : 'rgba(254, 112, 64, 0.10)'
   return (
     <div className="rounded-xl px-6 py-10 text-center" style={{ background: bg }}>
       {children}
@@ -295,7 +323,6 @@ export function FamilyDashboard({
   const declined = data.connections.filter((c) => c.status === 'declined')
   const anyConnections = active.length > 0 || pending.length > 0
 
-  // Active conversations where the doula replied last → family's turn
   const yourTurnCount = active.filter(
     (c) => c.last_message_sender_id !== null && c.last_message_sender_id !== userId
   ).length
@@ -319,7 +346,7 @@ export function FamilyDashboard({
           {/* ── Main column (2/3) ──────────────────────────────────────────── */}
           <div className="space-y-8 lg:col-span-2">
 
-            {/* ── Pending Connections — always visible ──────────────────────── */}
+            {/* ── Pending Connections ───────────────────────────────────────── */}
             <section>
               <h2 className="mb-4 flex items-center gap-2 font-arinoe text-2xl" style={{ color: '#90EBD2' }}>
                 Pending Connections
@@ -332,15 +359,15 @@ export function FamilyDashboard({
                   </p>
                 </EmptyState>
               ) : (
-                <div className="space-y-3">
+                <div className="grid gap-5 sm:grid-cols-2">
                   {pending.map((conn) => (
-                    <PendingRow key={conn.id} conn={conn} />
+                    <PendingCard key={conn.id} conn={conn} />
                   ))}
                 </div>
               )}
             </section>
 
-            {/* ── Active Conversations — only accepted connections ───────────── */}
+            {/* ── Active Conversations ──────────────────────────────────────── */}
             <section>
               <h2 className="mb-4 flex items-center gap-2 font-arinoe text-2xl text-brand-orange">
                 Active Conversations
@@ -369,9 +396,9 @@ export function FamilyDashboard({
                   )}
                 </EmptyState>
               ) : (
-                <div className="space-y-3">
+                <div className="grid gap-5 sm:grid-cols-2">
                   {active.map((conn) => (
-                    <ActiveRow key={conn.id} conn={conn} userId={userId} />
+                    <ActiveCard key={conn.id} conn={conn} userId={userId} />
                   ))}
                 </div>
               )}

@@ -1,14 +1,18 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import dynamic from 'next/dynamic'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { CalendarBlank, MapPin, Star, Users } from '@phosphor-icons/react'
+import { Baby, CalendarBlank, Star, Users, VideoCamera } from '@phosphor-icons/react'
 import { createClient } from '@/lib/supabase/client'
-import { VideoPlayer } from '@/components/video/VideoPlayer'
 import { ConnectionsRealtime } from './connections-realtime'
 import { GoLiveGate } from './go-live-gate'
 import type { DoulaDashboardData, DoulaConnection } from '../page'
+
+// MuxPlayer — SSR off
+const MuxPlayer = dynamic(() => import('@mux/mux-player-react'), { ssr: false })
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -25,10 +29,6 @@ function formatDueDate(dateStr: string | null): string | null {
   return new Date(dateStr).toLocaleString('en-GB', { month: 'short', year: 'numeric' })
 }
 
-/**
- * Takes a family's full_name ("Sarah Smith") and returns "Smith Family".
- * Falls back to "A Family" if name is null or single-word.
- */
 function familyDisplayName(fullName: string | null): string {
   if (!fullName) return 'A Family'
   const parts = fullName.trim().split(/\s+/)
@@ -47,6 +47,55 @@ function turnLabel(
   return { label: 'Your turn', yours: true }
 }
 
+// ── Portrait thumbnail with inline play ──────────────────────────────────────
+
+function PortraitVideo({ playbackId, alt }: { playbackId: string | null; alt: string }) {
+  const [playing, setPlaying] = useState(false)
+
+  return (
+    <div className="relative w-full overflow-hidden" style={{ aspectRatio: '9/16' }}>
+      {playing && playbackId ? (
+        <div className="absolute inset-0">
+          <MuxPlayer
+            playbackId={playbackId}
+            streamType="on-demand"
+            envKey={process.env.NEXT_PUBLIC_MUX_ENV_KEY}
+            autoPlay
+            style={{ width: '100%', height: '100%' }}
+            accentColor="#FE7040"
+          />
+        </div>
+      ) : playbackId ? (
+        <button
+          type="button"
+          onClick={() => setPlaying(true)}
+          className="group absolute inset-0 h-full w-full"
+          aria-label={`Play ${alt}`}
+        >
+          <Image
+            src={`https://image.mux.com/${playbackId}/thumbnail.jpg?time=0&width=480&fit_mode=smartcrop&height=853`}
+            alt=""
+            fill
+            sizes="(max-width: 640px) 100vw, 50vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/15 transition-colors group-hover:bg-black/30">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cotton shadow-lg ring-2 ring-dark-green/20 transition-transform group-hover:scale-105">
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 translate-x-0.5 text-dark-green" aria-hidden>
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </div>
+          </div>
+        </button>
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center bg-cotton">
+          <VideoCamera size={48} weight="duotone" className="text-dark-green/20" aria-hidden />
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Pending request card ──────────────────────────────────────────────────────
 
 function PendingCard({ conn }: { conn: DoulaConnection }) {
@@ -57,9 +106,9 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
 
   const displayName = familyDisplayName(conn.family_name)
   const dueDate     = formatDueDate(conn.due_date)
-  const textPreview = conn.what_they_want?.slice(0, 160) ?? null
   const textFull    = conn.what_they_want ?? null
-  const needsMore   = (conn.what_they_want?.length ?? 0) > 160
+  const textPreview = textFull?.slice(0, 160) ?? null
+  const needsMore   = (textFull?.length ?? 0) > 160
 
   async function respond(status: 'accepted' | 'declined') {
     const supabase = createClient()
@@ -75,27 +124,27 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
   }
 
   return (
-    <article className="card-hover rounded-xl border-2 border-dark-green bg-cotton overflow-hidden">
+    <article className="flex flex-col rounded-2xl border-2 border-dark-green bg-cotton overflow-hidden transition-transform duration-200 hover:-translate-y-1 shadow-[2px_2px_0px_#07403B] hover:shadow-[4px_4px_0px_#07403B]">
 
-      {/* Family intro video */}
-      {conn.family_video_id && (
-        <div className="border-b-2 border-dark-green/30">
-          <VideoPlayer playbackId={conn.family_video_id} />
-        </div>
-      )}
+      {/* Portrait thumbnail */}
+      <PortraitVideo
+        playbackId={conn.family_video_id}
+        alt={`${displayName} intro video`}
+      />
 
-      <div className="p-5 space-y-4">
+      {/* Content */}
+      <div className="flex flex-1 flex-col gap-3 p-4">
 
-        {/* Header row */}
-        <div className="flex items-start justify-between gap-3">
-          <p className="font-arinoe text-xl text-dark-green">{displayName}</p>
+        {/* Name + timestamp */}
+        <div className="flex items-start justify-between gap-2">
+          <p className="font-arinoe text-lg font-bold text-dark-green">{displayName}</p>
           <span className="shrink-0 text-xs font-abel text-muted-foreground">
             {daysAgo(conn.initiated_at)}
           </span>
         </div>
 
-        {/* Pills */}
-        <div className="flex flex-wrap gap-2">
+        {/* Attribute pills */}
+        <div className="flex flex-wrap gap-1.5">
           {dueDate && (
             <span className="inline-flex items-center gap-1 rounded-full bg-[#90EBD2] px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green">
               <CalendarBlank size={11} weight="duotone" aria-hidden />
@@ -104,7 +153,7 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
           )}
           {conn.birth_setting && (
             <span className="inline-flex items-center gap-1 rounded-full bg-dark-green px-2.5 py-0.5 text-xs font-abel font-medium text-cotton">
-              <MapPin size={11} weight="duotone" aria-hidden />
+              <Baby size={11} weight="duotone" aria-hidden />
               {conn.birth_setting}
             </span>
           )}
@@ -112,7 +161,7 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
 
         {/* Reaction note */}
         {conn.reaction_note && (
-          <blockquote className="border-l-4 border-light-pink pl-3 text-sm font-abel italic text-dark-green/70">
+          <blockquote className="border-l-[3px] border-[#F693C1] pl-3 text-sm font-abel italic text-dark-green/70">
             &ldquo;{conn.reaction_note}&rdquo;
           </blockquote>
         )}
@@ -137,14 +186,11 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
 
         {/* Expanded pregnancy notes */}
         {expanded && conn.pregnancy_notes && (
-          <div className="rounded-xl bg-muted/60 border border-dark-green/20 p-3">
-            <p className="mb-1 flex items-center gap-1 text-xs font-abel font-medium text-muted-foreground">
-              <span>🔒</span> Private
-            </p>
+          <div className="rounded-xl border border-dark-green/20 bg-muted/60 p-3">
+            <p className="mb-1 text-xs font-abel font-medium text-muted-foreground">🔒 Private</p>
             <p className="text-sm font-abel text-dark-green/80">{conn.pregnancy_notes}</p>
           </div>
         )}
-
         {expanded && (
           <button
             type="button"
@@ -155,26 +201,28 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
           </button>
         )}
 
-        {/* Actions */}
-        <div className="flex flex-wrap items-center gap-3 pt-1">
+        {/* Actions — pushed to bottom */}
+        <div className="mt-auto space-y-2 pt-3">
           {declining ? (
-            <div className="flex items-center gap-3">
+            <div className="space-y-2">
               <p className="text-sm font-abel text-dark-green">Are you sure?</p>
-              <button
-                type="button"
-                disabled={isPending}
-                onClick={() => respond('declined')}
-                className="rounded-full bg-dark-green px-4 py-1.5 text-xs font-abel font-medium text-cotton hover:opacity-80 transition-opacity disabled:opacity-50"
-              >
-                {isPending ? 'Declining…' : 'Confirm'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setDeclining(false)}
-                className="text-xs font-abel text-dark-green/60 underline underline-offset-4 hover:text-dark-green"
-              >
-                Cancel
-              </button>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => respond('declined')}
+                  className="flex-1 rounded-full bg-dark-green py-2 text-sm font-abel font-medium text-cotton transition-colors duration-200 hover:bg-[#F55CB1] disabled:opacity-50"
+                >
+                  {isPending ? 'Declining…' : 'Confirm'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDeclining(false)}
+                  className="flex-1 rounded-full border-2 border-dark-green py-2 text-sm font-abel font-medium text-dark-green transition-colors hover:bg-dark-green hover:text-cotton"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           ) : (
             <>
@@ -182,7 +230,7 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
                 type="button"
                 disabled={isPending}
                 onClick={() => respond('accepted')}
-                className="rounded-full bg-dark-green px-5 py-2 text-sm font-abel font-medium text-cotton transition-colors duration-200 hover:bg-popping-pink disabled:opacity-50"
+                className="block w-full rounded-full bg-dark-green py-2.5 text-center text-sm font-abel font-medium text-cotton transition-colors duration-200 hover:bg-[#F55CB1] disabled:opacity-50"
               >
                 {isPending ? 'Saving…' : 'Start conversation'}
               </button>
@@ -190,7 +238,7 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
                 type="button"
                 disabled={isPending}
                 onClick={() => setDeclining(true)}
-                className="rounded-full border-2 border-dark-green px-5 py-2 text-sm font-abel font-medium text-dark-green transition-colors duration-200 hover:bg-dark-green hover:text-cotton disabled:opacity-50"
+                className="block w-full rounded-full border-2 border-dark-green py-2.5 text-center text-sm font-abel font-medium text-dark-green transition-colors duration-200 hover:bg-dark-green hover:text-cotton disabled:opacity-50"
               >
                 Not available
               </button>
@@ -203,42 +251,64 @@ function PendingCard({ conn }: { conn: DoulaConnection }) {
   )
 }
 
-// ── Active connection row ─────────────────────────────────────────────────────
+// ── Active conversation card ──────────────────────────────────────────────────
 
-function ActiveRow({ conn, userId }: { conn: DoulaConnection; userId: string }) {
+function ActiveCard({ conn, userId }: { conn: DoulaConnection; userId: string }) {
   const displayName = familyDisplayName(conn.family_name)
   const dueDate     = formatDueDate(conn.due_date)
   const turn        = turnLabel(conn.last_message_sender_id, userId, conn.family_name)
 
   return (
-    <div className="card-hover flex items-center justify-between gap-4 rounded-xl border-2 border-dark-green bg-cotton px-5 py-4">
-      <div className="min-w-0">
-        <p className="font-arinoe text-lg text-dark-green truncate">{displayName}</p>
-        <div className="mt-1 flex flex-wrap items-center gap-2">
+    <article className="flex flex-col rounded-2xl border-2 border-dark-green bg-cotton overflow-hidden transition-transform duration-200 hover:-translate-y-1 shadow-[2px_2px_0px_#07403B] hover:shadow-[4px_4px_0px_#07403B]">
+
+      {/* Portrait thumbnail */}
+      <PortraitVideo
+        playbackId={conn.family_video_id}
+        alt={`${displayName} intro video`}
+      />
+
+      {/* Content */}
+      <div className="flex flex-1 flex-col gap-3 p-4">
+
+        <p className="font-arinoe text-lg font-bold text-dark-green">{displayName}</p>
+
+        {/* Attribute pills */}
+        <div className="flex flex-wrap gap-1.5">
           {dueDate && (
-            <span className="text-xs font-abel text-muted-foreground">Due {dueDate}</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#90EBD2] px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green">
+              <CalendarBlank size={11} weight="duotone" aria-hidden />
+              Due {dueDate}
+            </span>
           )}
           {conn.birth_setting && (
-            <span className="rounded-full bg-dark-green px-2.5 py-0.5 text-xs font-abel text-cotton">
+            <span className="inline-flex items-center gap-1 rounded-full bg-dark-green px-2.5 py-0.5 text-xs font-abel font-medium text-cotton">
+              <Baby size={11} weight="duotone" aria-hidden />
               {conn.birth_setting}
             </span>
           )}
           {turn.yours ? (
-            <span className="rounded-full bg-brand-orange px-2.5 py-0.5 text-xs font-abel font-medium text-cotton">
+            <span className="rounded-full bg-[#FE7040] px-2.5 py-0.5 text-xs font-abel font-medium text-cotton">
               {turn.label}
             </span>
           ) : (
-            <span className="text-xs font-abel text-muted-foreground">{turn.label}</span>
+            <span className="rounded-full bg-olive px-2.5 py-0.5 text-xs font-abel font-medium text-cotton">
+              {turn.label}
+            </span>
           )}
         </div>
+
+        {/* Open conversation — pushed to bottom */}
+        <div className="mt-auto pt-3">
+          <Link
+            href={`/dashboard/${conn.id}`}
+            className="block w-full rounded-full bg-dark-green py-2.5 text-center text-sm font-abel font-medium text-cotton transition-colors duration-200 hover:bg-[#F55CB1]"
+          >
+            Open conversation
+          </Link>
+        </div>
+
       </div>
-      <Link
-        href={`/dashboard/${conn.id}`}
-        className="shrink-0 rounded-full bg-dark-green px-4 py-1.5 text-xs font-abel font-medium text-cotton hover:opacity-80 transition-opacity"
-      >
-        Open conversation
-      </Link>
-    </div>
+    </article>
   )
 }
 
@@ -315,8 +385,8 @@ function EmptyState({
 }) {
   const bg =
     tint === 'orange'
-      ? 'rgba(254, 112, 64, 0.10)'   // brand-orange 10%
-      : 'rgba(149, 167, 51, 0.10)'   // olive 10%
+      ? 'rgba(254, 112, 64, 0.10)'
+      : 'rgba(149, 167, 51, 0.10)'
   return (
     <div className="rounded-xl px-6 py-10 text-center" style={{ background: bg }}>
       {children}
@@ -360,7 +430,7 @@ export function DoulaDashboard({
           </h1>
         </div>
 
-        {/* Go Live gate — full width */}
+        {/* Go Live gate */}
         <GoLiveGate
           doulaProfileId={data.doula_profile_id}
           circleVerified={data.circle_verified}
@@ -428,9 +498,9 @@ export function DoulaDashboard({
                   </p>
                 </EmptyState>
               ) : (
-                <div className="space-y-3">
+                <div className="grid gap-5 sm:grid-cols-2">
                   {active.map((conn) => (
-                    <ActiveRow key={conn.id} conn={conn} userId={userId} />
+                    <ActiveCard key={conn.id} conn={conn} userId={userId} />
                   ))}
                 </div>
               )}
