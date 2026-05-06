@@ -234,25 +234,22 @@ function ProfileCard({
   )
 }
 
-// ── Empty state ───────────────────────────────────────────────────────────────
+// ── Tinted empty state block ─────────────────────────────────────────────────
 
-function EmptyConversations() {
+function EmptyState({
+  children,
+  tint = 'orange',
+}: {
+  children: React.ReactNode
+  tint?: 'orange' | 'blue'
+}) {
+  const bg =
+    tint === 'blue'
+      ? 'rgba(144, 235, 210, 0.12)'  // light-blue 12%
+      : 'rgba(254, 112, 64, 0.10)'   // brand-orange 10%
   return (
-    <div
-      className="rounded-xl px-6 py-10 text-center"
-      style={{ background: 'rgba(254, 112, 64, 0.10)' }}
-    >
-      <p className="text-sm font-abel font-medium text-dark-green/70">
-        No conversations yet — find a doula whose video speaks to you and send them a note.
-      </p>
-      <div className="mt-5">
-        <Link
-          href="/doulas"
-          className="inline-block rounded-full bg-dark-green px-5 py-2 text-sm font-abel font-bold text-cotton hover:opacity-80 transition-opacity"
-        >
-          Browse doulas →
-        </Link>
-      </div>
+    <div className="rounded-xl px-6 py-10 text-center" style={{ background: bg }}>
+      {children}
     </div>
   )
 }
@@ -290,19 +287,25 @@ export function FamilyDashboard({
           {/* ── Main column (2/3) ──────────────────────────────────────────── */}
           <div className="space-y-8 lg:col-span-2">
 
-            {/* ── Pending Connections — only shown when doula hasn't accepted ── */}
-            {pending.length > 0 && (
-              <section>
-                <h2 className="mb-4 font-arinoe text-2xl" style={{ color: '#90EBD2' }}>
-                  Pending Connections
-                </h2>
+            {/* ── Pending Connections — always visible ──────────────────────── */}
+            <section>
+              <h2 className="mb-4 font-arinoe text-2xl" style={{ color: '#90EBD2' }}>
+                Pending Connections
+              </h2>
+              {pending.length === 0 ? (
+                <EmptyState tint="blue">
+                  <p className="text-sm font-abel font-medium text-dark-green/60">
+                    No pending connections yet.
+                  </p>
+                </EmptyState>
+              ) : (
                 <div className="space-y-3">
                   {pending.map((conn) => (
                     <PendingRow key={conn.id} conn={conn} />
                   ))}
                 </div>
-              </section>
-            )}
+              )}
+            </section>
 
             {/* ── Active Conversations — only accepted connections ───────────── */}
             <section>
@@ -310,13 +313,27 @@ export function FamilyDashboard({
                 Active Conversations
               </h2>
               {active.length === 0 ? (
-                anyConnections ? (
-                  <p className="text-sm font-abel text-dark-green/60 italic">
-                    No active conversations yet — hopefully soon!
-                  </p>
-                ) : (
-                  <EmptyConversations />
-                )
+                <EmptyState tint="orange">
+                  {anyConnections ? (
+                    <p className="text-sm font-abel font-medium text-dark-green/60">
+                      No active conversations yet — hopefully soon!
+                    </p>
+                  ) : (
+                    <>
+                      <p className="text-sm font-abel font-medium text-dark-green/70">
+                        No conversations yet — find a doula whose video speaks to you and send them a note.
+                      </p>
+                      <div className="mt-5">
+                        <Link
+                          href="/doulas"
+                          className="inline-block rounded-full bg-dark-green px-5 py-2 text-sm font-abel font-bold text-cotton hover:opacity-80 transition-opacity"
+                        >
+                          Browse doulas →
+                        </Link>
+                      </div>
+                    </>
+                  )}
+                </EmptyState>
               ) : (
                 <div className="space-y-3">
                   {active.map((conn) => (
