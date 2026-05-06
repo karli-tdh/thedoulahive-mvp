@@ -44,7 +44,7 @@ export default function Home() {
 
             {/* Eyebrow */}
             <p className="mb-6 font-abel text-xs font-bold uppercase tracking-[0.18em] text-dark-green">
-              Find your doula
+              Where doulas and families find each other
             </p>
 
             {/* Logo as hero statement */}
