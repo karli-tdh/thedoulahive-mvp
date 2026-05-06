@@ -3,11 +3,16 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { VideoPlayer } from '@/components/video/VideoPlayer'
 import {
-  MapPin,
-  CurrencyGbp,
-  Car,
-  Users,
+  Baby,
   CalendarBlank,
+  Car,
+  Certificate,
+  CurrencyGbp,
+  Heart,
+  MapPin,
+  Star,
+  Users,
+  UserSound,
 } from '@phosphor-icons/react/dist/ssr'
 import { ConnectButton } from './_components/connect-button'
 
@@ -50,14 +55,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 function SectionLabel({
   children,
   className = 'text-dark-green/50',
+  icon: Icon,
+  iconClass,
 }: {
   children: React.ReactNode
   className?: string
+  icon?: React.ElementType
+  iconClass?: string
 }) {
   return (
-    <p className={`font-arinoe text-[11px] uppercase tracking-[0.14em] ${className}`}>
+    <div className={`flex items-center gap-1 font-arinoe text-[11px] uppercase tracking-[0.14em] ${className}`}>
+      {Icon && <Icon size={12} weight="duotone" className={iconClass ?? ''} aria-hidden />}
       {children}
-    </p>
+    </div>
   )
 }
 
@@ -298,7 +308,7 @@ export default async function DoulaProfilePage({ params }: PageProps) {
 
             {(doula.support_types?.length ?? 0) > 0 && (
               <div className="space-y-2">
-                <SectionLabel className="text-[#F693C1]">Support type</SectionLabel>
+                <SectionLabel icon={Heart} iconClass="text-[#F693C1]" className="text-[#F693C1]">Support type</SectionLabel>
                 <div className="flex flex-wrap gap-2">
                   {doula.support_types!.map((t: string) => (
                     <SupportBadge key={t} label={t} />
@@ -309,7 +319,7 @@ export default async function DoulaProfilePage({ params }: PageProps) {
 
             {(doula.birth_settings?.length ?? 0) > 0 && (
               <div className="space-y-2">
-                <SectionLabel className="text-[#90EBD2]">Birth settings</SectionLabel>
+                <SectionLabel icon={Baby} iconClass="text-[#90EBD2]" className="text-[#90EBD2]">Birth settings</SectionLabel>
                 <div className="flex flex-wrap gap-2">
                   {doula.birth_settings!.map((s: string) => (
                     <BirthSettingBadge key={s} label={s} />
@@ -320,7 +330,7 @@ export default async function DoulaProfilePage({ params }: PageProps) {
 
             {(doula.specialisms?.length ?? 0) > 0 && (
               <div className="space-y-2">
-                <SectionLabel className="text-olive">Specialisms</SectionLabel>
+                <SectionLabel icon={Star} iconClass="text-olive" className="text-olive">Specialisms</SectionLabel>
                 <div className="flex flex-wrap gap-2">
                   {doula.specialisms!.map((s: string) => (
                     <SpecialismBadge key={s} label={s} />
@@ -331,7 +341,7 @@ export default async function DoulaProfilePage({ params }: PageProps) {
 
             {(doula.training_body?.length ?? 0) > 0 && (
               <div className="space-y-2">
-                <SectionLabel className="text-dark-green">Training</SectionLabel>
+                <SectionLabel icon={Certificate} iconClass="text-dark-green" className="text-dark-green">Training</SectionLabel>
                 <div className="flex flex-wrap gap-2">
                   {doula.training_body!.map((t: string) => (
                     <TrainingBadge key={t} label={t} />
@@ -342,7 +352,7 @@ export default async function DoulaProfilePage({ params }: PageProps) {
 
             {(doula.languages?.length ?? 0) > 0 && (
               <div className="space-y-2">
-                <SectionLabel className="text-[#FFE404]">Languages</SectionLabel>
+                <SectionLabel icon={UserSound} iconClass="text-[#FFE404]" className="text-[#FFE404]">Languages</SectionLabel>
                 <div className="flex flex-wrap gap-2">
                   {doula.languages!.map((l: string) => (
                     <LanguageBadge key={l} label={l} />

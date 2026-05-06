@@ -4,7 +4,7 @@ import { useState } from 'react'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
-import { CurrencyGbp, MapPin, VideoCamera } from '@phosphor-icons/react'
+import { Baby, CurrencyGbp, Heart, MapPin, Star, UserSound, VideoCamera, type Icon as PhosphorIcon } from '@phosphor-icons/react'
 
 // MuxPlayer — SSR off (uses browser APIs)
 const MuxPlayer = dynamic(() => import('@mux/mux-player-react'), { ssr: false })
@@ -32,14 +32,17 @@ function shortSetting(s: string) {
 }
 
 /** Arinoe all-caps small label — pass a Tailwind text-colour class via className */
-function SectionLabel({ children, className = 'text-dark-green/50' }: {
+function SectionLabel({ children, className = 'text-dark-green/50', icon: Icon, iconClass }: {
   children: React.ReactNode
   className?: string
+  icon?: PhosphorIcon
+  iconClass?: string
 }) {
   return (
-    <p className={`font-arinoe text-[10px] uppercase tracking-[0.14em] ${className}`}>
+    <div className={`flex items-center gap-1 font-arinoe text-[10px] uppercase tracking-[0.14em] ${className}`}>
+      {Icon && <Icon size={11} weight="duotone" className={iconClass ?? ''} aria-hidden />}
       {children}
-    </p>
+    </div>
   )
 }
 
@@ -158,7 +161,7 @@ export function DoulaCard({ doula }: { doula: DoulaListItem }) {
         {/* Support type */}
         {hasSupportType && (
           <div className="space-y-1.5">
-            <SectionLabel className="text-[#F693C1]">Support type</SectionLabel>
+            <SectionLabel icon={Heart} iconClass="text-[#F693C1]" className="text-[#F693C1]">Support type</SectionLabel>
             <div className="flex flex-wrap gap-1.5">
               {doula.support_types!.map((t) => (
                 <span key={t} className="rounded-full bg-[#F693C1] px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green">
@@ -172,7 +175,7 @@ export function DoulaCard({ doula }: { doula: DoulaListItem }) {
         {/* Birth setting */}
         {hasBirthSetting && (
           <div className="space-y-1.5">
-            <SectionLabel className="text-[#90EBD2]">Birth setting</SectionLabel>
+            <SectionLabel icon={Baby} iconClass="text-[#90EBD2]" className="text-[#90EBD2]">Birth setting</SectionLabel>
             <div className="flex flex-wrap gap-1.5">
               {doula.birth_settings!.map((s) => (
                 <span key={s} className="rounded-full bg-[#90EBD2] px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green">
@@ -186,7 +189,7 @@ export function DoulaCard({ doula }: { doula: DoulaListItem }) {
         {/* Specialisms */}
         {hasSpecialisms && (
           <div className="space-y-1.5">
-            <SectionLabel className="text-olive">Specialisms</SectionLabel>
+            <SectionLabel icon={Star} iconClass="text-olive" className="text-olive">Specialisms</SectionLabel>
             <div className="flex flex-wrap gap-1.5">
               {topSpecialisms.map((s) => (
                 <span key={s} className="rounded-full bg-olive px-2.5 py-0.5 text-xs font-abel font-medium text-cotton">
@@ -196,6 +199,25 @@ export function DoulaCard({ doula }: { doula: DoulaListItem }) {
               {extraCount > 0 && (
                 <span className="rounded-full border border-dark-green/30 px-2.5 py-0.5 text-xs font-abel text-dark-green/50">
                   +{extraCount} more
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Languages */}
+        {(doula.languages?.length ?? 0) > 0 && (
+          <div className="space-y-1.5">
+            <SectionLabel icon={UserSound} iconClass="text-[#FFE404]" className="text-[#FFE404]">Language</SectionLabel>
+            <div className="flex flex-wrap gap-1.5">
+              {doula.languages!.slice(0, 2).map((l) => (
+                <span key={l} className="rounded-full bg-[#FFE404] px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green">
+                  {l}
+                </span>
+              ))}
+              {doula.languages!.length > 2 && (
+                <span className="rounded-full border border-dark-green/30 px-2.5 py-0.5 text-xs font-abel text-dark-green/50">
+                  +{doula.languages!.length - 2} more
                 </span>
               )}
             </div>
