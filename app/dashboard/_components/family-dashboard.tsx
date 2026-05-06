@@ -348,9 +348,9 @@ export function FamilyDashboard({
 
             {/* ── Pending Connections ───────────────────────────────────────── */}
             <section>
-              <h2 className="mb-4 flex items-center gap-2 font-arinoe text-2xl" style={{ color: '#90EBD2' }}>
+              <h2 className="mb-4 flex items-center gap-2 font-arinoe text-2xl text-olive">
                 Pending Connections
-                <HexBadge count={pending.length} fill="#90EBD2" textClass="text-dark-green" />
+                <HexBadge count={pending.length} fill="#95A733" textClass="text-cotton" />
               </h2>
               {pending.length === 0 ? (
                 <EmptyState tint="blue">
