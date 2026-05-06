@@ -24,6 +24,7 @@ export default async function DoulasPage({
          support_types,
          birth_settings,
          specialisms,
+         languages,
          price_range,
          intro_video_id,
          circle_verified,
@@ -43,10 +44,11 @@ export default async function DoulasPage({
   // we know profiles is a single object (many-to-one FK), so cast here.
   const typed     = (doulas ?? []) as unknown as DoulaListItem[]
   const liveCount = liveRaw ?? typed.length  // fall back to published count
+  const languages = Array.from(new Set(typed.flatMap((d) => d.languages ?? []))).sort()
 
   return (
     <main className="min-h-screen">
-      <DolaGrid doulas={typed} liveCount={liveCount} welcome={searchParams.welcome === 'true'} />
+      <DolaGrid doulas={typed} languages={languages} liveCount={liveCount} welcome={searchParams.welcome === 'true'} />
     </main>
   )
 }

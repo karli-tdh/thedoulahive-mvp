@@ -141,6 +141,14 @@ mux-player {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
+   Specialism filter dropdown — orange scrollbar (Chrome/Edge only)
+═══════════════════════════════════════════════════════════════════ */
+
+.scrollbar-orange::-webkit-scrollbar        { width: 4px; }
+.scrollbar-orange::-webkit-scrollbar-track  { background: #F9F4E0; border-radius: 2px; }
+.scrollbar-orange::-webkit-scrollbar-thumb  { background: #FE7040; border-radius: 2px; }
+
+/* ═══════════════════════════════════════════════════════════════════
    Chrome autofill override — forces cotton bg + dark green text
    across all form pages (login, signup, onboarding)
 ═══════════════════════════════════════════════════════════════════ */

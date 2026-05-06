@@ -17,6 +17,7 @@ export interface DoulaListItem {
   support_types: string[] | null
   birth_settings: string[] | null
   specialisms: string[] | null
+  languages: string[] | null
   price_range: string | null
   intro_video_id: string | null
   circle_verified: boolean | null
@@ -30,10 +31,13 @@ function shortSetting(s: string) {
   return s
 }
 
-// Muted small-caps section label used for "In her words" / "Specialisms"
-function SectionLabel({ children }: { children: React.ReactNode }) {
+/** Arinoe all-caps small label — pass a Tailwind text-colour class via className */
+function SectionLabel({ children, className = 'text-dark-green/50' }: {
+  children: React.ReactNode
+  className?: string
+}) {
   return (
-    <p className="text-[10px] font-abel font-medium uppercase tracking-widest text-dark-green/50">
+    <p className={`font-arinoe text-[10px] uppercase tracking-[0.14em] ${className}`}>
       {children}
     </p>
   )
@@ -48,7 +52,9 @@ export function DoulaCard({ doula }: { doula: DoulaListItem }) {
   const location       = doula.profiles?.location
   const topSpecialisms = (doula.specialisms ?? []).slice(0, 3)
   const extraCount     = Math.max(0, (doula.specialisms?.length ?? 0) - 3)
-  const hasSpecialisms = topSpecialisms.length > 0
+  const hasSupportType  = (doula.support_types?.length ?? 0) > 0
+  const hasBirthSetting = (doula.birth_settings?.length ?? 0) > 0
+  const hasSpecialisms  = topSpecialisms.length > 0
 
   return (
     <article className="flex flex-col rounded-2xl border-2 border-dark-green bg-cotton overflow-hidden transition-transform duration-200 hover:-translate-y-1 shadow-[2px_2px_0px_#07403B] hover:shadow-[4px_4px_0px_#07403B]">
@@ -105,7 +111,6 @@ export function DoulaCard({ doula }: { doula: DoulaListItem }) {
           <p className="font-arinoe text-lg font-bold text-dark-green">{name}</p>
           {doula.circle_verified && (
             <span className="group/badge relative inline-flex h-[18px] w-[16px] shrink-0 cursor-default items-center justify-center">
-              {/* Honeycomb — sunny yellow */}
               <svg viewBox="0 0 980.68 1080" className="absolute inset-0 h-full w-full" aria-hidden>
                 <path
                   fill="#FFE404"
@@ -116,9 +121,7 @@ export function DoulaCard({ doula }: { doula: DoulaListItem }) {
                      c0-26.81-14.31-51.59-37.53-65Z"
                 />
               </svg>
-              {/* Checkmark inside */}
               <span className="relative text-[7px] font-bold leading-none text-dark-green">✓</span>
-              {/* Tooltip */}
               <span className="pointer-events-none absolute bottom-full left-1/2 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-lg bg-dark-green px-2.5 py-1 text-[10px] font-abel text-cotton opacity-0 shadow-md transition-opacity group-hover/badge:opacity-100">
                 Verified Hive member
               </span>
@@ -126,7 +129,7 @@ export function DoulaCard({ doula }: { doula: DoulaListItem }) {
           )}
         </div>
 
-        {/* Icon attribute row */}
+        {/* Icon attribute row — location + price */}
         <div className="flex flex-col gap-1">
           {location && (
             <div className="flex items-center gap-1.5">
@@ -142,36 +145,48 @@ export function DoulaCard({ doula }: { doula: DoulaListItem }) {
           )}
         </div>
 
-        {/* "In her words" + tagline blockquote */}
+        {/* In her words */}
         {doula.tagline && (
           <div className="space-y-1">
-            <SectionLabel>In her words</SectionLabel>
+            <SectionLabel className="text-dark-green/50">In her words</SectionLabel>
             <blockquote className="border-l-[3px] border-[#F693C1] pl-3 text-sm font-abel font-medium leading-snug text-dark-green">
               {doula.tagline}
             </blockquote>
           </div>
         )}
 
-        {/* Support type + birth setting pills */}
-        {((doula.support_types?.length ?? 0) > 0 || (doula.birth_settings?.length ?? 0) > 0) && (
-          <div className="flex flex-wrap gap-1.5">
-            {doula.support_types?.map((t) => (
-              <span key={t} className="rounded-full bg-[#F693C1] px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green">
-                {t}
-              </span>
-            ))}
-            {doula.birth_settings?.map((s) => (
-              <span key={s} className="rounded-full bg-[#90EBD2] px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green">
-                {shortSetting(s)}
-              </span>
-            ))}
+        {/* Support type */}
+        {hasSupportType && (
+          <div className="space-y-1.5">
+            <SectionLabel className="text-[#F693C1]">Support type</SectionLabel>
+            <div className="flex flex-wrap gap-1.5">
+              {doula.support_types!.map((t) => (
+                <span key={t} className="rounded-full bg-[#F693C1] px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green">
+                  {t}
+                </span>
+              ))}
+            </div>
           </div>
         )}
 
-        {/* "Specialisms" label + specialism pills */}
+        {/* Birth setting */}
+        {hasBirthSetting && (
+          <div className="space-y-1.5">
+            <SectionLabel className="text-[#90EBD2]">Birth setting</SectionLabel>
+            <div className="flex flex-wrap gap-1.5">
+              {doula.birth_settings!.map((s) => (
+                <span key={s} className="rounded-full bg-[#90EBD2] px-2.5 py-0.5 text-xs font-abel font-medium text-dark-green">
+                  {shortSetting(s)}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Specialisms */}
         {hasSpecialisms && (
           <div className="space-y-1.5">
-            <SectionLabel>Specialisms</SectionLabel>
+            <SectionLabel className="text-olive">Specialisms</SectionLabel>
             <div className="flex flex-wrap gap-1.5">
               {topSpecialisms.map((s) => (
                 <span key={s} className="rounded-full bg-olive px-2.5 py-0.5 text-xs font-abel font-medium text-cotton">

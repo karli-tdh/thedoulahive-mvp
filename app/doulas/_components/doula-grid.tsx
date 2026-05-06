@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Heart, House, MapPin, Star, VideoCamera, type Icon as PhosphorIcon } from '@phosphor-icons/react'
+import { Baby, Heart, MapPin, Star, Translate, type Icon as PhosphorIcon } from '@phosphor-icons/react'
 import { DoulaCard } from './doula-card'
 import type { DoulaListItem } from './doula-card'
 
@@ -29,10 +29,11 @@ interface Filters {
   birthSetting: string[]
   location:     string
   specialisms:  string[]
+  languages:    string[]
 }
 
 const EMPTY_FILTERS: Filters = {
-  supportType: [], birthSetting: [], location: '', specialisms: [],
+  supportType: [], birthSetting: [], location: '', specialisms: [], languages: [],
 }
 
 type ColorScheme = 'pink' | 'blue' | 'olive'
@@ -53,15 +54,14 @@ function hasFilters(f: Filters) {
     f.supportType.length > 0 ||
     f.birthSetting.length > 0 ||
     f.location.trim().length > 0 ||
-    f.specialisms.length > 0
+    f.specialisms.length > 0 ||
+    f.languages.length > 0
   )
 }
 
 // ── Filter chip ──────────────────────────────────────────────────────────────
 
-function FilterChip({
-  label, active, onClick, colorScheme,
-}: {
+function FilterChip({ label, active, onClick, colorScheme }: {
   label: string
   active: boolean
   onClick: () => void
@@ -72,7 +72,6 @@ function FilterChip({
     blue:  'border-[#90EBD2] bg-[#90EBD2] text-dark-green',
     olive: 'border-olive bg-olive text-cotton',
   }
-
   return (
     <button
       type="button"
@@ -80,7 +79,7 @@ function FilterChip({
       className={`rounded-full border-2 px-3 py-1 text-xs font-abel font-medium transition-colors ${
         active
           ? activeClass[colorScheme]
-          : 'border-dark-green/40 bg-transparent text-dark-green hover:border-dark-green hover:bg-dark-green/5'
+          : 'border-cotton/40 bg-transparent text-cotton hover:border-cotton hover:bg-white/10'
       }`}
     >
       {label}
@@ -90,20 +89,47 @@ function FilterChip({
 
 // ── Filter section label ─────────────────────────────────────────────────────
 
-function FilterLabel({
-  icon: Icon,
-  children,
-  iconClass = 'text-dark-green',
-}: {
+function FilterLabel({ icon: Icon, children, iconClass = 'text-cotton' }: {
   icon: PhosphorIcon
   children: React.ReactNode
   iconClass?: string
 }) {
   return (
-    <div className="mb-1.5 flex items-center gap-1 text-xs font-abel font-medium text-dark-green">
+    <div className="mb-2 flex items-center gap-1.5 font-arinoe text-[11px] uppercase tracking-[0.14em] text-cotton">
       <Icon size={13} weight="duotone" className={iconClass} aria-hidden />
       {children}
     </div>
+  )
+}
+
+// ── Olive checkbox (shared between Specialism + Language) ────────────────────
+
+function OliveCheckbox({ checked, onChange, label }: {
+  checked: boolean
+  onChange: () => void
+  label: string
+}) {
+  return (
+    <label className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-white/10">
+      <div className="relative h-4 w-4 shrink-0">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={onChange}
+          className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+        />
+        <div className={`flex h-4 w-4 items-center justify-center rounded border transition-colors duration-150 ${
+          checked ? 'border-olive bg-olive' : 'border-cotton/40 bg-transparent'
+        }`}>
+          {checked && (
+            <svg viewBox="0 0 10 8" fill="none" className="h-2.5 w-2.5" aria-hidden>
+              <path d="M1 4l2.5 2.5L9 1" stroke="#07403B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </div>
+      </div>
+      <span className="text-xs font-abel text-cotton">{label}</span>
+    </label>
   )
 }
 
@@ -111,16 +137,19 @@ function FilterLabel({
 
 export function DolaGrid({
   doulas,
+  languages,
   liveCount,
   welcome = false,
 }: {
   doulas: DoulaListItem[]
+  languages: string[]
   liveCount: number
   welcome?: boolean
 }) {
   const [filters, setFilters]               = useState<Filters>(EMPTY_FILTERS)
   const [filtersOpen, setFiltersOpen]       = useState(false)
   const [specialismOpen, setSpecialismOpen] = useState(false)
+  const [languageOpen, setLanguageOpen]     = useState(false)
   const [showWelcome, setShowWelcome]       = useState(welcome)
 
   // ── Filtering ─────────────────────────────────────────────────────────────
@@ -144,11 +173,16 @@ export function DolaGrid({
         const matches = filters.specialisms.some((s) => d.specialisms?.includes(s))
         if (!matches) return false
       }
+      if (filters.languages.length > 0) {
+        const matches = filters.languages.some((l) => d.languages?.includes(l))
+        if (!matches) return false
+      }
       return true
     })
   }, [doulas, filters])
 
   const active = hasFilters(filters)
+  const displayCount = active ? filtered.length : liveCount
 
   // ── Empty state (no doulas at all) ────────────────────────────────────────
 
@@ -181,12 +215,7 @@ export function DolaGrid({
           <p className="text-sm text-dark-green font-abel">
             <span className="font-medium">You&apos;re all set.</span> Start browsing doulas below.
           </p>
-          <button
-            type="button"
-            onClick={() => setShowWelcome(false)}
-            aria-label="Dismiss"
-            className="shrink-0 text-dark-green/60 hover:text-dark-green"
-          >
+          <button type="button" onClick={() => setShowWelcome(false)} aria-label="Dismiss" className="shrink-0 text-dark-green/60 hover:text-dark-green">
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -197,13 +226,10 @@ export function DolaGrid({
       {/* Page heading */}
       <div className="mb-8">
         <h1 className="font-arinoe text-4xl text-dark-green sm:text-5xl">Find a doula</h1>
-        <p className="mt-2 text-sm text-muted-foreground font-abel">
-          {liveCount} doula{liveCount !== 1 ? 's' : ''} available on The Doula Hive
-        </p>
       </div>
 
-      {/* ── Filter bar ─────────────────────────────────────────────────────── */}
-      <div className="mb-8 rounded-xl border-2 border-dark-green bg-cotton p-4 sm:p-5">
+      {/* ── Filter bar — dark green background ─────────────────────────────── */}
+      <div className="mb-4 rounded-xl border-2 border-dark-green bg-dark-green p-4 sm:p-5">
 
         {/* Mobile toggle */}
         <button
@@ -211,20 +237,17 @@ export function DolaGrid({
           className="flex w-full items-center justify-between sm:hidden"
           onClick={() => setFiltersOpen((o) => !o)}
         >
-          <span className="text-sm font-abel font-medium text-dark-green">
+          <span className="font-arinoe text-xs uppercase tracking-[0.14em] text-cotton">
             Filters{active ? ' (active)' : ''}
           </span>
-          <svg
-            className={`h-4 w-4 text-dark-green/60 transition-transform ${filtersOpen ? 'rotate-180' : ''}`}
-            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-          >
+          <svg className={`h-4 w-4 text-cotton/60 transition-transform ${filtersOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
         </button>
 
         {/* Filter controls */}
         <div className={`${filtersOpen ? 'mt-4' : 'hidden'} sm:block`}>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
 
             {/* Location */}
             <div>
@@ -234,7 +257,7 @@ export function DolaGrid({
                 placeholder="e.g. London"
                 value={filters.location}
                 onChange={(e) => setFilters((f) => ({ ...f, location: e.target.value }))}
-                className="w-full rounded-lg border-2 border-dark-green/40 bg-cotton px-3 py-2 text-sm font-abel text-dark-green placeholder:text-dark-green/40 focus:outline-none focus:border-dark-green"
+                className="w-full rounded-lg border-2 border-cotton/40 bg-white/10 px-3 py-2 text-sm font-abel text-cotton placeholder:text-cotton/40 focus:outline-none focus:border-cotton"
               />
             </div>
 
@@ -256,7 +279,7 @@ export function DolaGrid({
 
             {/* Birth setting */}
             <div>
-              <FilterLabel icon={House} iconClass="text-[#90EBD2]">Birth setting</FilterLabel>
+              <FilterLabel icon={Baby} iconClass="text-[#90EBD2]">Birth setting</FilterLabel>
               <div className="flex flex-wrap gap-2">
                 {BIRTH_SETTING_OPTIONS.map((s) => (
                   <FilterChip
@@ -274,61 +297,70 @@ export function DolaGrid({
             <div>
               <button
                 type="button"
-                className="mb-1.5 flex w-full items-center justify-between"
+                className="mb-2 flex w-full items-center justify-between"
                 onClick={() => setSpecialismOpen((o) => !o)}
               >
-                <span className="flex items-center gap-1 text-xs font-abel font-medium text-dark-green">
+                <span className="flex items-center gap-1.5 font-arinoe text-[11px] uppercase tracking-[0.14em] text-cotton">
                   <Star size={13} weight="duotone" className="text-olive" aria-hidden />
                   Specialism
                   {filters.specialisms.length > 0 && (
-                    <span className="ml-0.5 text-dark-green/60">({filters.specialisms.length})</span>
+                    <span className="ml-0.5 font-abel text-cotton/60">({filters.specialisms.length})</span>
                   )}
                 </span>
-                <svg
-                  className={`h-3.5 w-3.5 text-dark-green/60 transition-transform ${specialismOpen ? 'rotate-180' : ''}`}
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-                >
+                <svg className={`h-3.5 w-3.5 text-cotton/60 transition-transform ${specialismOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-
               {specialismOpen && (
-                <div className="mt-1 max-h-48 overflow-y-auto rounded-lg border-2 border-dark-green/30 bg-cotton p-2">
-                  {SPECIALISM_OPTIONS.map((s) => {
-                    const checked = filters.specialisms.includes(s)
-                    return (
-                      <label
-                        key={s}
-                        className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-dark-green/5"
-                      >
-                        {/* Custom olive checkbox */}
-                        <div className="relative h-4 w-4 shrink-0">
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={() => setFilters((f) => ({ ...f, specialisms: toggle(f.specialisms, s) }))}
-                            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-                          />
-                          <div className={`flex h-4 w-4 items-center justify-center rounded border transition-colors duration-150 ${
-                            checked ? 'border-olive bg-olive' : 'border-dark-green/40 bg-cotton'
-                          }`}>
-                            {checked && (
-                              <svg viewBox="0 0 10 8" fill="none" className="h-2.5 w-2.5" aria-hidden>
-                                <path d="M1 4l2.5 2.5L9 1" stroke="#F9F4E0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                              </svg>
-                            )}
-                          </div>
-                        </div>
-                        <span className="text-xs font-abel text-dark-green">{s}</span>
-                      </label>
-                    )
-                  })}
+                <div className="mt-1 max-h-48 overflow-y-auto rounded-lg border-2 border-cotton/20 bg-dark-green/60 p-1 scrollbar-orange">
+                  {SPECIALISM_OPTIONS.map((s) => (
+                    <OliveCheckbox
+                      key={s}
+                      label={s}
+                      checked={filters.specialisms.includes(s)}
+                      onChange={() => setFilters((f) => ({ ...f, specialisms: toggle(f.specialisms, s) }))}
+                    />
+                  ))}
                 </div>
               )}
             </div>
+
+            {/* Language — collapsible */}
+            {languages.length > 0 && (
+              <div>
+                <button
+                  type="button"
+                  className="mb-2 flex w-full items-center justify-between"
+                  onClick={() => setLanguageOpen((o) => !o)}
+                >
+                  <span className="flex items-center gap-1.5 font-arinoe text-[11px] uppercase tracking-[0.14em] text-cotton">
+                    <Translate size={13} weight="duotone" className="text-cotton" aria-hidden />
+                    Language
+                    {filters.languages.length > 0 && (
+                      <span className="ml-0.5 font-abel text-cotton/60">({filters.languages.length})</span>
+                    )}
+                  </span>
+                  <svg className={`h-3.5 w-3.5 text-cotton/60 transition-transform ${languageOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {languageOpen && (
+                  <div className="mt-1 max-h-48 overflow-y-auto rounded-lg border-2 border-cotton/20 bg-dark-green/60 p-1 scrollbar-orange">
+                    {languages.map((l) => (
+                      <OliveCheckbox
+                        key={l}
+                        label={l}
+                        checked={filters.languages.includes(l)}
+                        onChange={() => setFilters((f) => ({ ...f, languages: toggle(f.languages, l) }))}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Clear filters — popping pink, right-aligned */}
+          {/* Clear filters */}
           {active && (
             <div className="mt-4 flex justify-end">
               <button
@@ -343,11 +375,18 @@ export function DolaGrid({
         </div>
       </div>
 
+      {/* Results count — below filter bar, updates with filters */}
+      <p className="mb-6 text-sm font-abel text-dark-green/60">
+        {displayCount} doula{displayCount !== 1 ? 's' : ''} meet your criteria
+      </p>
+
       {/* ── Grid ─────────────────────────────────────────────────────────── */}
       {filtered.length === 0 ? (
         <div className="py-20 text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-            <VideoCamera size={28} weight="duotone" className="text-muted-foreground" aria-hidden />
+            <svg className="h-7 w-7 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+            </svg>
           </div>
           <p className="text-sm font-abel font-medium text-dark-green">
             No doulas match those filters yet — try broadening your search.
