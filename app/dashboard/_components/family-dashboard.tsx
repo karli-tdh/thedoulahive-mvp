@@ -296,11 +296,13 @@ function EmptyState({
   tint = 'orange',
 }: {
   children: React.ReactNode
-  tint?: 'orange' | 'blue'
+  tint?: 'orange' | 'blue' | 'olive'
 }) {
   const bg =
     tint === 'blue'
       ? 'rgba(144, 235, 210, 0.12)'
+      : tint === 'olive'
+      ? 'rgba(149, 167, 51, 0.10)'
       : 'rgba(254, 112, 64, 0.10)'
   return (
     <div className="rounded-xl px-6 py-10 text-center" style={{ background: bg }}>
@@ -353,7 +355,7 @@ export function FamilyDashboard({
                 <HexBadge count={pending.length} fill="#95A733" textClass="text-cotton" />
               </h2>
               {pending.length === 0 ? (
-                <EmptyState tint="blue">
+                <EmptyState tint="olive">
                   <p className="text-sm font-abel font-medium text-dark-green/60">
                     No pending connections yet.
                   </p>
